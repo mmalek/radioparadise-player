@@ -5,15 +5,21 @@ import QtQuick.Controls.Styles 1.1
 
 Rectangle {
     id: rectangle1
-    width: 360
-    height: 360
+    width: 500
+    height: 281.25
     color: palette.window
 
     SystemPalette { id: palette; colorGroup: SystemPalette.Active }
 
+    function playStream(qualityIndex) {
+        stream.source = "http://stream-tx4.radioparadise.com/rp_%1.ogg".arg( qualityModel.get( qualityIndex ).quality );
+        print( "Playing stream " + stream.source );
+        stream.play();
+    }
+
     Audio {
         id: stream
-        source: "http://stream-uk1.radioparadise.com/mp3-32"
+        volume: volume.value
     }
 
     Image {
@@ -24,9 +30,23 @@ Rectangle {
     }
 
     Image {
+        id: radioParadiseLogo
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.leftMargin: 10
+        anchors.topMargin: 10
+        source: "qrc:///images/logo_hd.png"
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: Qt.openUrlExternally( "http://www.radioparadise.com" )
+        }
+    }
+
+    Image {
         id: coverImage
         anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        anchors.bottom: streamQuality.top
         anchors.leftMargin: 10
         anchors.bottomMargin: 10
         width: 64
@@ -36,10 +56,14 @@ Rectangle {
     Text {
         anchors.verticalCenter: coverImage.verticalCenter
         anchors.left: coverImage.right
+        anchors.right: parent.right
         anchors.leftMargin: 10
+        anchors.rightMargin: 10
         id: title
-        font.pointSize: 18
+        font.pointSize: 12
         style: Text.Outline; styleColor: "#FFFFFF"
+        textFormat: Text.RichText
+        elide: Text.ElideRight
         onLinkActivated: Qt.openUrlExternally( link )
         MouseArea {
             anchors.fill: parent
@@ -48,28 +72,61 @@ Rectangle {
         }
     }
 
-    Button {
-        id: playButton
-        text: qsTr("Play")
-        anchors.right: stopButton.left
+    Slider {
+        id: volume
+
+        anchors.left: parent.left
         anchors.bottom: parent.bottom
-        anchors.rightMargin: 10
+        anchors.leftMargin: 10
         anchors.bottomMargin: 10
-        onClicked: stream.play()
+
+        value: 0.5
+    }
+
+    ComboBox {
+        id: streamQuality
+
+        anchors.left: volume.right
+        anchors.bottom: volume.bottom
+        anchors.leftMargin: 5
+
+        currentIndex: 1
+        model: ListModel {
+            id: qualityModel
+            ListElement { text: "32k"; quality: 32 }
+            ListElement { text: "96k"; quality: 96 }
+            ListElement { text: "192k"; quality: 192 }
+        }
+        onActivated: {
+            if( stream.playbackState === Audio.PlayingState )
+                playStream(index);
+        }
     }
 
     Button {
         id: stopButton
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.rightMargin: 10
-        anchors.bottomMargin: 10
+
+        anchors.left: streamQuality.right
+        anchors.bottom: streamQuality.bottom
+        anchors.leftMargin: 5
+
         text: qsTr("Stop")
         onClicked: stream.stop()
     }
 
+    Button {
+        id: playButton
+
+        anchors.left: stopButton.right
+        anchors.bottom: stopButton.bottom
+        anchors.leftMargin: 5
+
+        text: qsTr("Play")
+        onClicked: playStream(streamQuality.currentIndex)
+    }
+
     Text {
-        text: "HD"
+        text: qsTr("HD")
         anchors.verticalCenter: hdSwitch.verticalCenter
         anchors.right: hdSwitch.left
         anchors.rightMargin: 5
@@ -133,7 +190,7 @@ Rectangle {
                         }
                     }
 
-                    var titleText = "<a href=\"http://www.radioparadise.com/rp2-content.php?name=Music&file=songinfo&song_id==%1\">%2 — %3</a>";
+                    var titleText = "<a href='http://www.radioparadise.com/rp2-content.php?name=Music&file=songinfo&song_id==%1' style='color: black; text-decoration: none'>%2 — %3</a>";
                     title.text = titleText.arg( songId ).arg( artist ).arg( songTitle );
                 }
             }

@@ -7,6 +7,7 @@ qt5_add_resources(resources resources.qrc)
 
 add_executable(radioparadise-player
 	main.cpp
+	main.qml
 	${resources}
 )
 
