@@ -1,13 +1,17 @@
 import QtQuick 2.0
-import QtMultimedia 5.0
 import QtQuick.Controls 1.1
 import QtQuick.Controls.Styles 1.1
+import QtQuick.Window 2.1
+import QtMultimedia 5.0
 
-Rectangle {
-    id: rectangle1
+Window {
     width: 500
-    height: 281.25
+    height: 500 / 2.56
     color: palette.window
+    visible: true
+    title: qsTr("Radio Paradise")
+    minimumWidth: playButton.x + playButton.width + 10
+    minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + coverImage.height + stopButton.height + 30
 
     SystemPalette { id: palette; colorGroup: SystemPalette.Active }
 
@@ -93,9 +97,9 @@ Rectangle {
         currentIndex: 1
         model: ListModel {
             id: qualityModel
-            ListElement { text: "32k"; quality: 32 }
-            ListElement { text: "96k"; quality: 96 }
-            ListElement { text: "192k"; quality: 192 }
+            ListElement { text: QT_TR_NOOP("32k"); quality: 32 }
+            ListElement { text: QT_TR_NOOP("96k"); quality: 96 }
+            ListElement { text: QT_TR_NOOP("192k"); quality: 192 }
         }
         onActivated: {
             if( stream.playbackState === Audio.PlayingState )
@@ -198,4 +202,3 @@ Rectangle {
         }
     }
 }
-

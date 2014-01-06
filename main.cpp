@@ -1,17 +1,11 @@
-#include <QtGui/QGuiApplication>
-#include <QtQuick/QQuickView>
-#include <QtQml/QQmlEngine>
+#include <QtGui/QIcon>
+#include <QtWidgets/QApplication>
+#include <QtQml/QQmlApplicationEngine>
 
 int main(int argc, char *argv[])
 {
-	QGuiApplication app(argc, argv);
-	app.setApplicationName( QObject::tr("Radio Paradise") );
-
-	QQuickView view;
-	view.connect(view.engine(), SIGNAL(quit()), SLOT(close()));
-	view.setResizeMode(QQuickView::SizeRootObjectToView);
-	view.setSource( QUrl("qrc:///qml/main.qml") );
-	view.show();
-
+	QApplication app(argc, argv);
+	QQmlApplicationEngine engine(QUrl("qrc:///qml/main.qml"));
+	app.setWindowIcon(QIcon("qrc:///images/logo.png"));
 	return app.exec();
 }
