@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.1
-import QtQuick.Controls.Styles 1.1
+import QtQuick.Layouts 1.1
 import QtQuick.Window 2.1
 import QtMultimedia 5.0
 
@@ -10,8 +10,8 @@ Window {
     color: palette.window
     visible: true
     title: qsTr("Radio Paradise")
-    minimumWidth: playButton.x + playButton.width + 10
-    minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + coverImage.height + stopButton.height + 30
+    minimumWidth: controlsLayout.x + controlsLayout.width + 10
+    minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + coverImage.height + controlsLayout.height + 30
 
     SystemPalette { id: palette; colorGroup: SystemPalette.Active }
 
@@ -28,17 +28,21 @@ Window {
 
     Image {
         id: backgroundImage
+
         anchors.fill: parent
+
         fillMode: Image.PreserveAspectCrop
         visible: hdSwitch.checked
     }
 
     Image {
         id: radioParadiseLogo
+
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.leftMargin: 10
         anchors.topMargin: 10
+
         source: "qrc:///images/logo_hd.png"
         MouseArea {
             anchors.fill: parent
@@ -49,21 +53,25 @@ Window {
 
     Image {
         id: coverImage
+
         anchors.left: parent.left
-        anchors.bottom: streamQuality.top
+        anchors.bottom: controlsLayout.top
         anchors.leftMargin: 10
         anchors.bottomMargin: 10
+
         width: 64
         height: 64
     }
 
     Text {
+        id: title
+
         anchors.verticalCenter: coverImage.verticalCenter
         anchors.left: coverImage.right
-        anchors.right: parent.right
+        anchors.right: songTime.left
         anchors.leftMargin: 10
-        anchors.rightMargin: 10
-        id: title
+        anchors.rightMargin: 5
+
         font.pointSize: 12
         style: Text.Outline; styleColor: "#FFFFFF"
         textFormat: Text.RichText
@@ -76,57 +84,67 @@ Window {
         }
     }
 
-    Slider {
-        id: volume
+    Text {
+        id: songTime
 
+        anchors.verticalCenter: title.verticalCenter
+        anchors.right: controlsLayout.right
+
+        font.pointSize: title.font.pointSize
+        style: title.style; styleColor: title.styleColor
+        textFormat: title.textFormat
+        property int seconds: 0.0
+        text: leadingZero( Math.floor( seconds/60 ) ) + ":" + leadingZero( seconds % 60 )
+
+        function leadingZero( num ) {
+            var str = num.toString();
+            if( str.length === 1 )
+            {
+                str = "0" + str;
+            }
+            return str;
+        }
+    }
+
+    RowLayout {
+        id: controlsLayout
+        spacing: 5
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.leftMargin: 10
         anchors.bottomMargin: 10
 
-        value: 0.5
-    }
-
-    ComboBox {
-        id: streamQuality
-
-        anchors.left: volume.right
-        anchors.bottom: volume.bottom
-        anchors.leftMargin: 5
-
-        currentIndex: 1
-        model: ListModel {
-            id: qualityModel
-            ListElement { text: QT_TR_NOOP("32k"); quality: 32 }
-            ListElement { text: QT_TR_NOOP("96k"); quality: 96 }
-            ListElement { text: QT_TR_NOOP("192k"); quality: 192 }
+        Slider {
+            id: volume
+            value: 0.5
         }
-        onActivated: {
-            if( stream.playbackState === Audio.PlayingState )
-                playStream(index);
+
+        ComboBox {
+            id: streamQuality
+            currentIndex: 1
+            model: ListModel {
+                id: qualityModel
+                ListElement { text: QT_TR_NOOP("32k"); quality: 32 }
+                ListElement { text: QT_TR_NOOP("96k"); quality: 96 }
+                ListElement { text: QT_TR_NOOP("192k"); quality: 192 }
+            }
+            onActivated: {
+                if( stream.playbackState === Audio.PlayingState )
+                    playStream(index);
+            }
         }
-    }
 
-    Button {
-        id: stopButton
+        Button {
+            id: stopButton
+            text: qsTr("Stop")
+            onClicked: stream.stop()
+        }
 
-        anchors.left: streamQuality.right
-        anchors.bottom: streamQuality.bottom
-        anchors.leftMargin: 5
-
-        text: qsTr("Stop")
-        onClicked: stream.stop()
-    }
-
-    Button {
-        id: playButton
-
-        anchors.left: stopButton.right
-        anchors.bottom: stopButton.bottom
-        anchors.leftMargin: 5
-
-        text: qsTr("Play")
-        onClicked: playStream(streamQuality.currentIndex)
+        Button {
+            id: playButton
+            text: qsTr("Play")
+            onClicked: playStream(streamQuality.currentIndex)
+        }
     }
 
     Text {
@@ -169,18 +187,21 @@ Window {
         repeat: true
         triggeredOnStart: true
         onTriggered: {
+            progressTimer.stop();
+
             var req = new XMLHttpRequest();
             req.open( "GET", "http://radioparadise.com/ajax_xml_song_info.php?song_id=now" );
             req.onreadystatechange = function() {
                 if( req.readyState === XMLHttpRequest.DONE ) {
                     var root = req.responseXML.documentElement;
+                    var interval
                     var songId;
                     var songTitle;
                     var artist;
                     for( var node = root.firstChild; node; node = node.nextSibling ) {
                         if( node.nodeName === "refresh_interval" ) {
-                            songInfoTimer.interval = parseInt( node.firstChild.nodeValue ) * 1000;
-                            print( "interval: " + songInfoTimer.interval );
+                            print( "interval: " + node.firstChild.nodeValue );
+                            interval = parseInt( node.firstChild.nodeValue )
                         } else if( node.nodeName === "med_cover" ) {
                             coverImage.source = node.firstChild.nodeValue;
                         } else if( node.nodeName === "songid" ) {
@@ -194,11 +215,23 @@ Window {
                         }
                     }
 
+                    songInfoTimer.interval = interval * 1000;
+                    songTime.seconds = interval;
+                    progressTimer.start();
+
                     var titleText = "<a href='http://www.radioparadise.com/rp2-content.php?name=Music&file=songinfo&song_id==%1' style='color: black; text-decoration: none'>%2 — %3</a>";
                     title.text = titleText.arg( songId ).arg( artist ).arg( songTitle );
                 }
             }
             req.send();
         }
+    }
+
+    Timer {
+        id: progressTimer
+        interval: 1000
+        running: false
+        repeat: true
+        onTriggered: { --songTime.seconds }
     }
 }
