@@ -119,7 +119,7 @@ Window {
 
 			property int seconds: 0.0
 
-			text: leadingZero( Math.floor( seconds/60 ) ) + ":" + leadingZero( seconds % 60 )
+			text: "(%1:%2)".arg( leadingZero( Math.floor( seconds/60 ) ) ).arg( leadingZero( seconds % 60 ) )
 			font.pointSize: title.font.pointSize
 			color: title.color
 			textFormat: title.textFormat
