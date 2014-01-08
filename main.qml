@@ -67,8 +67,7 @@ Window {
 			anchors.fill: parent
 			color: "black"
 			radius: 10
-			opacity: 0.5
-			visible: hdSwitch.checked
+			opacity: 0.0
 		}
 
 		Image {
@@ -99,7 +98,6 @@ Window {
 			text: ( artist && songTitle ) ? "%1 — %2".arg( artist ).arg( songTitle ) : ""
 			font.pointSize: 12
 			font.underline: titleMouseArea.containsMouse
-			color: hdSwitch.checked ? "#FFFFFF" : palette.windowText
 			elide: Text.ElideRight
 			MouseArea {
 				id: titleMouseArea
@@ -115,7 +113,7 @@ Window {
 
 			anchors.verticalCenter: title.verticalCenter
 			anchors.right: parent.right
-			anchors.rightMargin: 5
+			anchors.rightMargin: 10
 
 			property int seconds: 0.0
 
@@ -176,6 +174,26 @@ Window {
 				visible: !stopButton.visible
 			}
 		}
+
+		states: [
+			State {
+				name: "HD_DISABLED";
+				when: !hdSwitch.checked
+				PropertyChanges { target: controlsBackground; opacity: 0.0 }
+				PropertyChanges { target: title; color: palette.windowText }
+			},
+			State {
+				name: "HD_ENABLED";
+				when: hdSwitch.checked
+				PropertyChanges { target: controlsBackground;  opacity: 0.5 }
+				PropertyChanges { target: title; color: "#FFFFFF" }
+			}
+		]
+
+		transitions: [
+			Transition { PropertyAnimation { property: "opacity"; easing.type: Easing.Linear } },
+			Transition { ColorAnimation { easing.type: Easing.Linear } }
+		]
 	}
 
     Text {
@@ -265,5 +283,5 @@ Window {
         running: false
         repeat: true
         onTriggered: { --songTime.seconds }
-    }
+	}
 }
