@@ -168,12 +168,14 @@ Window {
 				id: stopButton
 				text: qsTr("Stop")
 				onClicked: stream.stop()
+				visible: stream.playbackState === Audio.PlayingState
 			}
 
 			Button {
 				id: playButton
 				text: qsTr("Play")
 				onClicked: playStream(streamQuality.currentIndex)
+				visible: !stopButton.visible
 			}
 		}
 	}
