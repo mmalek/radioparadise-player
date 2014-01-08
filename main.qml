@@ -72,8 +72,16 @@ Window {
         anchors.leftMargin: 10
         anchors.rightMargin: 5
 
+		property int songId;
+		property string artist;
+		property string songTitle;
+
+        text: ( songId && artist && songTitle ) ?
+			"<a href='http://www.radioparadise.com/rp2-content.php?name=Music&file=songinfo&song_id==%1' style='color: %4; text-decoration: none'>%2 — %3</a>".arg( songId ).arg( artist ).arg( songTitle ).arg( color )
+			: ""
         font.pointSize: 12
-        style: Text.Outline; styleColor: "#FFFFFF"
+        style: Text.Outline;
+		styleColor: "#FFFFFF"
         textFormat: Text.RichText
         elide: Text.ElideRight
         onLinkActivated: Qt.openUrlExternally( link )
@@ -90,11 +98,13 @@ Window {
         anchors.verticalCenter: title.verticalCenter
         anchors.right: controlsLayout.right
 
-        font.pointSize: title.font.pointSize
-        style: title.style; styleColor: title.styleColor
-        textFormat: title.textFormat
         property int seconds: 0.0
+
         text: leadingZero( Math.floor( seconds/60 ) ) + ":" + leadingZero( seconds % 60 )
+        font.pointSize: title.font.pointSize
+        style: title.style;
+		styleColor: title.styleColor
+        textFormat: title.textFormat
 
         function leadingZero( num ) {
             var str = num.toString();
@@ -219,8 +229,9 @@ Window {
                     songTime.seconds = interval;
                     progressTimer.start();
 
-                    var titleText = "<a href='http://www.radioparadise.com/rp2-content.php?name=Music&file=songinfo&song_id==%1' style='color: black; text-decoration: none'>%2 — %3</a>";
-                    title.text = titleText.arg( songId ).arg( artist ).arg( songTitle );
+					title.songId = songId;
+					title.artist = artist;
+					title.songTitle = songTitle;
                 }
             }
             req.send();
