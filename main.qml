@@ -96,18 +96,17 @@ Window {
 			property string artist;
 			property string songTitle;
 
-			text: ( songId && artist && songTitle ) ?
-				"<a href='http://www.radioparadise.com/rp2-content.php?name=Music&file=songinfo&song_id==%1' style='color: %4; text-decoration: none'>%2 — %3</a>".arg( songId ).arg( artist ).arg( songTitle ).arg( color )
-				: ""
+			text: ( artist && songTitle ) ? "%1 — %2".arg( artist ).arg( songTitle ) : ""
 			font.pointSize: 12
+			font.underline: titleMouseArea.containsMouse
 			color: hdSwitch.checked ? "#FFFFFF" : palette.windowText
-			textFormat: Text.RichText
 			elide: Text.ElideRight
-			onLinkActivated: Qt.openUrlExternally( link )
 			MouseArea {
+				id: titleMouseArea
 				anchors.fill: parent
 				cursorShape: Qt.PointingHandCursor
-				onPressed:{ mouse.accepted = false }
+				hoverEnabled: true
+				onClicked: { Qt.openUrlExternally( "http://www.radioparadise.com/rp2-content.php?name=Music&file=songinfo&song_id==%1".arg( parent.songId ) ) }
 			}
 		}
 
