@@ -10,8 +10,8 @@ Window {
     color: palette.window
     visible: true
     title: qsTr("Radio Paradise")
-    minimumWidth: controlsRect.width + 10
-    minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + controlsRect.height + 15
+    minimumWidth: controlsRect.width + 20
+    minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + controlsRect.height + 20
 
     SystemPalette { id: palette; colorGroup: SystemPalette.Active }
 
@@ -56,10 +56,10 @@ Window {
 		
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.bottom: parent.bottom
-		anchors.bottomMargin: 5
+		anchors.bottomMargin: 10
     
-		width: controlsLayout.x + controlsLayout.width + 5
-	    height: coverImage.height + controlsLayout.height + 20
+		width: controlsLayout.width + 25
+	    height: coverImage.height + controlsLayout.height + 30
 
 		Rectangle {
 			id: controlsBackground
@@ -76,8 +76,8 @@ Window {
 
 			anchors.left: parent.left
 			anchors.top: parent.top
-			anchors.leftMargin: 5
-			anchors.topMargin: 5
+			anchors.leftMargin: 10
+			anchors.topMargin: 10
 
 			width: 64
 			height: 64
@@ -140,7 +140,7 @@ Window {
 			spacing: 5
 			anchors.left: parent.left
 			anchors.top: coverImage.bottom
-			anchors.leftMargin: 5
+			anchors.leftMargin: 10
 			anchors.topMargin: 10
 
 			Slider {
