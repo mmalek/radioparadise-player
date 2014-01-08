@@ -10,7 +10,7 @@ Window {
     color: palette.window
     visible: true
     title: qsTr("Radio Paradise")
-    minimumWidth: controlsRect.x + controlsRect.width + 5
+    minimumWidth: controlsRect.width + 10
     minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + controlsRect.height + 15
 
     SystemPalette { id: palette; colorGroup: SystemPalette.Active }
@@ -54,9 +54,8 @@ Window {
 	Item {
 		id: controlsRect
 		
-		anchors.left: parent.left
+		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.bottom: parent.bottom
-		anchors.leftMargin: 5
 		anchors.bottomMargin: 5
     
 		width: controlsLayout.x + controlsLayout.width + 5
