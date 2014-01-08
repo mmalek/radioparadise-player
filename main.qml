@@ -10,8 +10,8 @@ Window {
     color: palette.window
     visible: true
     title: qsTr("Radio Paradise")
-    minimumWidth: controlsLayout.x + controlsLayout.width + 10
-    minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + coverImage.height + controlsLayout.height + 30
+    minimumWidth: controlsRect.x + controlsRect.width + 5
+    minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + controlsRect.height + 15
 
     SystemPalette { id: palette; colorGroup: SystemPalette.Active }
 
@@ -51,111 +51,132 @@ Window {
         }
     }
 
-    Image {
-        id: coverImage
+	Item {
+		id: controlsRect
+		
+		anchors.left: parent.left
+		anchors.bottom: parent.bottom
+		anchors.leftMargin: 5
+		anchors.bottomMargin: 5
+    
+		width: controlsLayout.x + controlsLayout.width + 5
+	    height: coverImage.height + controlsLayout.height + 20
 
-        anchors.left: parent.left
-        anchors.bottom: controlsLayout.top
-        anchors.leftMargin: 10
-        anchors.bottomMargin: 10
+		Rectangle {
+			id: controlsBackground
 
-        width: 64
-        height: 64
-    }
+			anchors.fill: parent
+			color: "black"
+			radius: 10
+			opacity: 0.5
+			visible: hdSwitch.checked
+		}
 
-    Text {
-        id: title
+		Image {
+			id: coverImage
 
-        anchors.verticalCenter: coverImage.verticalCenter
-        anchors.left: coverImage.right
-        anchors.right: songTime.left
-        anchors.leftMargin: 10
-        anchors.rightMargin: 5
+			anchors.left: parent.left
+			anchors.top: parent.top
+			anchors.leftMargin: 5
+			anchors.topMargin: 5
 
-		property int songId;
-		property string artist;
-		property string songTitle;
+			width: 64
+			height: 64
+		}
 
-        text: ( songId && artist && songTitle ) ?
-			"<a href='http://www.radioparadise.com/rp2-content.php?name=Music&file=songinfo&song_id==%1' style='color: %4; text-decoration: none'>%2 — %3</a>".arg( songId ).arg( artist ).arg( songTitle ).arg( color )
-			: ""
-        font.pointSize: 12
-        style: Text.Outline;
-		styleColor: "#FFFFFF"
-        textFormat: Text.RichText
-        elide: Text.ElideRight
-        onLinkActivated: Qt.openUrlExternally( link )
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onPressed:{ mouse.accepted = false }
-        }
-    }
+		Text {
+			id: title
 
-    Text {
-        id: songTime
+			anchors.verticalCenter: coverImage.verticalCenter
+			anchors.left: coverImage.right
+			anchors.right: songTime.left
+			anchors.leftMargin: 10
+			anchors.rightMargin: 5
 
-        anchors.verticalCenter: title.verticalCenter
-        anchors.right: controlsLayout.right
+			property int songId;
+			property string artist;
+			property string songTitle;
 
-        property int seconds: 0.0
+			text: ( songId && artist && songTitle ) ?
+				"<a href='http://www.radioparadise.com/rp2-content.php?name=Music&file=songinfo&song_id==%1' style='color: %4; text-decoration: none'>%2 — %3</a>".arg( songId ).arg( artist ).arg( songTitle ).arg( color )
+				: ""
+			font.pointSize: 12
+			color: hdSwitch.checked ? "#FFFFFF" : palette.windowText
+			textFormat: Text.RichText
+			elide: Text.ElideRight
+			onLinkActivated: Qt.openUrlExternally( link )
+			MouseArea {
+				anchors.fill: parent
+				cursorShape: Qt.PointingHandCursor
+				onPressed:{ mouse.accepted = false }
+			}
+		}
 
-        text: leadingZero( Math.floor( seconds/60 ) ) + ":" + leadingZero( seconds % 60 )
-        font.pointSize: title.font.pointSize
-        style: title.style;
-		styleColor: title.styleColor
-        textFormat: title.textFormat
+		Text {
+			id: songTime
 
-        function leadingZero( num ) {
-            var str = num.toString();
-            if( str.length === 1 )
-            {
-                str = "0" + str;
-            }
-            return str;
-        }
-    }
+			anchors.verticalCenter: title.verticalCenter
+			anchors.right: parent.right
+			anchors.rightMargin: 5
 
-    RowLayout {
-        id: controlsLayout
-        spacing: 5
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
-        anchors.leftMargin: 10
-        anchors.bottomMargin: 10
+			property int seconds: 0.0
 
-        Slider {
-            id: volume
-            value: 0.5
-        }
+			text: leadingZero( Math.floor( seconds/60 ) ) + ":" + leadingZero( seconds % 60 )
+			font.pointSize: title.font.pointSize
+			color: title.color
+			textFormat: title.textFormat
 
-        ComboBox {
-            id: streamQuality
-            currentIndex: 1
-            model: ListModel {
-                id: qualityModel
-                ListElement { text: QT_TR_NOOP("32k"); quality: 32 }
-                ListElement { text: QT_TR_NOOP("96k"); quality: 96 }
-                ListElement { text: QT_TR_NOOP("192k"); quality: 192 }
-            }
-            onActivated: {
-                if( stream.playbackState === Audio.PlayingState )
-                    playStream(index);
-            }
-        }
+			function leadingZero( num ) {
+				var str = num.toString();
+				if( str.length === 1 )
+				{
+					str = "0" + str;
+				}
+				return str;
+			}
+		}
 
-        Button {
-            id: stopButton
-            text: qsTr("Stop")
-            onClicked: stream.stop()
-        }
+		RowLayout {
+			id: controlsLayout
+			spacing: 5
+			anchors.left: parent.left
+			anchors.top: coverImage.bottom
+			anchors.leftMargin: 5
+			anchors.topMargin: 10
 
-        Button {
-            id: playButton
-            text: qsTr("Play")
-            onClicked: playStream(streamQuality.currentIndex)
-        }
-    }
+			Slider {
+				id: volume
+				value: 0.5
+			}
+
+			ComboBox {
+				id: streamQuality
+				currentIndex: 1
+				model: ListModel {
+					id: qualityModel
+					ListElement { text: QT_TR_NOOP("32k"); quality: 32 }
+					ListElement { text: QT_TR_NOOP("96k"); quality: 96 }
+					ListElement { text: QT_TR_NOOP("192k"); quality: 192 }
+				}
+				onActivated: {
+					if( stream.playbackState === Audio.PlayingState )
+						playStream(index);
+				}
+			}
+
+			Button {
+				id: stopButton
+				text: qsTr("Stop")
+				onClicked: stream.stop()
+			}
+
+			Button {
+				id: playButton
+				text: qsTr("Play")
+				onClicked: playStream(streamQuality.currentIndex)
+			}
+		}
+	}
 
     Text {
         text: qsTr("HD")
