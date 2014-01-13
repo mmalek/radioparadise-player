@@ -1,0 +1,6 @@
+#ifndef CONFIGIN_HPP
+#define CONFIGIN_HPP
+
+#cmakedefine01 BUILD_MPRIS
+
+#endif // CONFIGIN_HPP

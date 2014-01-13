@@ -1,17 +1,50 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(radioparadise-player)
 
-find_package(Qt5 REQUIRED COMPONENTS Multimedia Quick Widgets)
-
-qt5_add_resources(resources resources.qrc)
-
-add_executable(radioparadise-player
-	main.cpp
-	main.qml
-	${resources}
+find_package(Qt5
+	REQUIRED COMPONENTS Multimedia Quick Widgets
+	OPTIONAL_COMPONENTS DBus
 )
 
-target_link_libraries(radioparadise-player
+if( Qt5DBus_FOUND )
+	set( BUILD_MPRIS TRUE )
+endif()
+
+configure_file(config.hpp.in config.hpp)
+
+set(sources
+	main.cpp
+	main.qml
+)
+
+set(libraries
 	Qt5::Qml
 	Qt5::Widgets
 )
+
+qt5_add_resources(sources resources.qrc)
+
+if( BUILD_MPRIS )
+	list( APPEND sources mpris2.cpp )
+	list( APPEND libraries Qt5::DBus )
+
+	qt5_add_dbus_adaptor(sources
+		org.mpris.MediaPlayer2.xml
+		mpris2.hpp Mpris2
+		mpris2_root Mpris2Root
+	)
+
+	qt5_add_dbus_adaptor(sources
+		org.mpris.MediaPlayer2.Player.xml
+		mpris2.hpp Mpris2
+		mpris2_player Mpris2Player
+	)
+endif()
+
+add_executable(radioparadise-player ${sources})
+
+target_include_directories(radioparadise-player PRIVATE . ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(radioparadise-player ${libraries})
+
+set_property(TARGET radioparadise-player PROPERTY AUTOMOC TRUE)
