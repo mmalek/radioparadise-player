@@ -5,61 +5,61 @@ import QtQuick.Window 2.1
 import QtMultimedia 5.0
 
 Window {
-    width: 500
-    height: 500 / 2.56
-    color: palette.window
-    visible: true
-    title: qsTr("Radio Paradise")
-    minimumWidth: controlsRect.width + 20
-    minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + controlsRect.height + 20
+	width: 500
+	height: 500 / 2.56
+	color: palette.window
+	visible: true
+	title: qsTr("Radio Paradise")
+	minimumWidth: controlsRect.width + 20
+	minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + controlsRect.height + 20
 
-    SystemPalette { id: palette; colorGroup: SystemPalette.Active }
+	SystemPalette { id: palette; colorGroup: SystemPalette.Active }
 
-    function playStream(qualityIndex) {
-        stream.source = "http://stream-tx4.radioparadise.com/rp_%1.ogg".arg( qualityModel.get( qualityIndex ).quality );
-        print( "Playing stream " + stream.source );
-        stream.play();
-    }
+	function playStream(qualityIndex) {
+		stream.source = "http://stream-tx4.radioparadise.com/rp_%1.ogg".arg( qualityModel.get( qualityIndex ).quality );
+		print( "Playing stream " + stream.source );
+		stream.play();
+	}
 
-    Audio {
-        id: stream
-        volume: volume.value
-    }
+	Audio {
+		id: stream
+		volume: volume.value
+	}
 
-    Image {
-        id: backgroundImage
+	Image {
+		id: backgroundImage
 
-        anchors.fill: parent
+		anchors.fill: parent
 
-        fillMode: Image.PreserveAspectCrop
-        visible: hdSwitch.checked
-    }
+		fillMode: Image.PreserveAspectCrop
+		visible: hdSwitch.checked
+	}
 
-    Image {
-        id: radioParadiseLogo
+	Image {
+		id: radioParadiseLogo
 
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.leftMargin: 10
-        anchors.topMargin: 10
+		anchors.left: parent.left
+		anchors.top: parent.top
+		anchors.leftMargin: 10
+		anchors.topMargin: 10
 
-        source: "qrc:///images/logo_hd.png"
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: Qt.openUrlExternally( "http://www.radioparadise.com" )
-        }
-    }
+		source: "qrc:///images/logo_hd.png"
+		MouseArea {
+			anchors.fill: parent
+			cursorShape: Qt.PointingHandCursor
+			onClicked: Qt.openUrlExternally( "http://www.radioparadise.com" )
+		}
+	}
 
 	Item {
 		id: controlsRect
-		
+
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 10
-    
+
 		width: controlsLayout.width + 25
-	    height: coverImage.height + controlsLayout.height + 30
+		height: coverImage.height + controlsLayout.height + 30
 
 		Rectangle {
 			id: controlsBackground
@@ -196,92 +196,92 @@ Window {
 		]
 	}
 
-    Text {
-        text: qsTr("HD")
-        anchors.verticalCenter: hdSwitch.verticalCenter
-        anchors.right: hdSwitch.left
-        anchors.rightMargin: 5
-        style: Text.Outline; styleColor: "#FFFFFF"
-    }
+	Text {
+		text: qsTr("HD")
+		anchors.verticalCenter: hdSwitch.verticalCenter
+		anchors.right: hdSwitch.left
+		anchors.rightMargin: 5
+		style: Text.Outline; styleColor: "#FFFFFF"
+	}
 
-    Switch {
-        id: hdSwitch
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.rightMargin: 10
-        anchors.topMargin: 10
-    }
+	Switch {
+		id: hdSwitch
+		anchors.right: parent.right
+		anchors.top: parent.top
+		anchors.rightMargin: 10
+		anchors.topMargin: 10
+	}
 
-    Timer {
-        interval: 15000;
-        running: hdSwitch.checked
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            var req = new XMLHttpRequest();
-            req.open( "GET", "http://radioparadise.com/readtxt.php" );
-            req.onreadystatechange = function() {
-                if( req.readyState === XMLHttpRequest.DONE ) {
-                    backgroundImage.source = req.responseText.trim();
-                }
-            }
-            req.send();
-        }
-    }
+	Timer {
+		interval: 15000;
+		running: hdSwitch.checked
+		repeat: true
+		triggeredOnStart: true
+		onTriggered: {
+			var req = new XMLHttpRequest();
+			req.open( "GET", "http://radioparadise.com/readtxt.php" );
+			req.onreadystatechange = function() {
+				if( req.readyState === XMLHttpRequest.DONE ) {
+					backgroundImage.source = req.responseText.trim();
+				}
+			}
+			req.send();
+		}
+	}
 
-    Timer {
-        id: songInfoTimer
-        interval: 0
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            progressTimer.stop();
+	Timer {
+		id: songInfoTimer
+		interval: 0
+		running: true
+		repeat: true
+		triggeredOnStart: true
+		onTriggered: {
+			progressTimer.stop();
 
-            var req = new XMLHttpRequest();
-            req.open( "GET", "http://radioparadise.com/ajax_xml_song_info.php?song_id=now" );
-            req.onreadystatechange = function() {
-                if( req.readyState === XMLHttpRequest.DONE ) {
-                    var root = req.responseXML.documentElement;
-                    var interval
-                    var songId;
-                    var songTitle;
-                    var artist;
-                    for( var node = root.firstChild; node; node = node.nextSibling ) {
-                        if( node.nodeName === "refresh_interval" ) {
-                            print( "interval: " + node.firstChild.nodeValue );
-                            interval = parseInt( node.firstChild.nodeValue )
-                        } else if( node.nodeName === "med_cover" ) {
-                            coverImage.source = node.firstChild.nodeValue;
-                        } else if( node.nodeName === "songid" ) {
-                            songId = node.firstChild.nodeValue;
-                        } else if( node.nodeName === "title" ) {
-                            print( "title: " + node.firstChild.nodeValue );
-                            songTitle = node.firstChild.nodeValue;
-                        } else if( node.nodeName === "artist" ) {
-                            print( "artist: " + node.firstChild.nodeValue );
-                            artist = node.firstChild.nodeValue;
-                        }
-                    }
+			var req = new XMLHttpRequest();
+			req.open( "GET", "http://radioparadise.com/ajax_xml_song_info.php?song_id=now" );
+			req.onreadystatechange = function() {
+				if( req.readyState === XMLHttpRequest.DONE ) {
+					var root = req.responseXML.documentElement;
+					var interval
+					var songId;
+					var songTitle;
+					var artist;
+					for( var node = root.firstChild; node; node = node.nextSibling ) {
+						if( node.nodeName === "refresh_interval" ) {
+							print( "interval: " + node.firstChild.nodeValue );
+							interval = parseInt( node.firstChild.nodeValue )
+						} else if( node.nodeName === "med_cover" ) {
+							coverImage.source = node.firstChild.nodeValue;
+						} else if( node.nodeName === "songid" ) {
+							songId = node.firstChild.nodeValue;
+						} else if( node.nodeName === "title" ) {
+							print( "title: " + node.firstChild.nodeValue );
+							songTitle = node.firstChild.nodeValue;
+						} else if( node.nodeName === "artist" ) {
+							print( "artist: " + node.firstChild.nodeValue );
+							artist = node.firstChild.nodeValue;
+						}
+					}
 
-                    songInfoTimer.interval = interval * 1000;
-                    songTime.seconds = interval;
-                    progressTimer.start();
+					songInfoTimer.interval = interval * 1000;
+					songTime.seconds = interval;
+					progressTimer.start();
 
 					title.songId = songId;
 					title.artist = artist;
 					title.songTitle = songTitle;
-                }
-            }
-            req.send();
-        }
-    }
+				}
+			}
+			req.send();
+		}
+	}
 
-    Timer {
-        id: progressTimer
-        interval: 1000
-        running: false
-        repeat: true
-        onTriggered: { --songTime.seconds }
+	Timer {
+		id: progressTimer
+		interval: 1000
+		running: false
+		repeat: true
+		onTriggered: { --songTime.seconds }
 	}
 }
