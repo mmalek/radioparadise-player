@@ -16,13 +16,13 @@ Window {
 	SystemPalette { id: palette; colorGroup: SystemPalette.Active }
 
 	function playStream(qualityIndex) {
-		stream.source = "http://stream-tx4.radioparadise.com/rp_%1.ogg".arg( qualityModel.get( qualityIndex ).quality );
-		print( "Playing stream " + stream.source );
-		stream.play();
+		player.source = "http://stream-tx4.radioparadise.com/rp_%1.ogg".arg( qualityModel.get( qualityIndex ).quality );
+		print( "Playing stream " + player.source );
+		player.play();
 	}
 
 	Audio {
-		id: stream
+		id: player
 		volume: volume.value
 	}
 
@@ -155,7 +155,7 @@ Window {
 					ListElement { text: QT_TR_NOOP("192k"); quality: 192 }
 				}
 				onActivated: {
-					if( stream.playbackState === Audio.PlayingState )
+					if( player.playbackState === Audio.PlayingState )
 						playStream(index);
 				}
 			}
@@ -163,8 +163,8 @@ Window {
 			Button {
 				id: stopButton
 				text: qsTr("Stop")
-				onClicked: stream.stop()
-				visible: stream.playbackState === Audio.PlayingState
+				onClicked: player.stop()
+				visible: player.playbackState === Audio.PlayingState
 			}
 
 			Button {
