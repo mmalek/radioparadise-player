@@ -5,7 +5,7 @@ import QtQuick.Window 2.1
 import QtMultimedia 5.0
 
 Window {
-	id: root
+	id: window
 	width: 500
 	height: 500 / 2.56
 	color: palette.window
@@ -16,6 +16,10 @@ Window {
 
 	readonly property int playbackState: player.playbackState
 	property real volume: 0.5
+	property int songId;
+	property string artistName;
+	property string songTitle;
+	property string albumTitle;
 
 	function stop() {
 		player.stop();
@@ -35,7 +39,7 @@ Window {
 
 	Audio {
 		id: player
-		volume: root.volume
+		volume: window.volume
 	}
 
 	Image {
@@ -103,11 +107,7 @@ Window {
 			anchors.leftMargin: 10
 			anchors.rightMargin: 5
 
-			property int songId;
-			property string artist;
-			property string songTitle;
-
-			text: ( artist && songTitle ) ? "%1 — %2".arg( artist ).arg( songTitle ) : ""
+			text: ( window.artistName && window.songTitle ) ? "%1 — %2".arg( window.artistName ).arg( window.songTitle ) : ""
 			font.pointSize: 12
 			font.underline: titleMouseArea.containsMouse
 			elide: Text.ElideRight
@@ -154,8 +154,8 @@ Window {
 
 			Slider {
 				id: volumeSlider
-				value: root.volume
-				onValueChanged: root.volume = value
+				value: window.volume
+				onValueChanged: window.volume = value
 			}
 
 			ComboBox {
@@ -176,14 +176,14 @@ Window {
 			Button {
 				id: stopButton
 				text: qsTr("Stop")
-				onClicked: root.stop()
+				onClicked: window.stop()
 				visible: player.playbackState === Audio.PlayingState
 			}
 
 			Button {
 				id: playButton
 				text: qsTr("Play")
-				onClicked: root.play()
+				onClicked: window.play()
 				visible: !stopButton.visible
 			}
 		}
@@ -257,9 +257,6 @@ Window {
 				if( req.readyState === XMLHttpRequest.DONE ) {
 					var root = req.responseXML.documentElement;
 					var interval
-					var songId;
-					var songTitle;
-					var artist;
 					for( var node = root.firstChild; node; node = node.nextSibling ) {
 						if( node.nodeName === "refresh_interval" ) {
 							print( "interval: " + node.firstChild.nodeValue );
@@ -267,23 +264,22 @@ Window {
 						} else if( node.nodeName === "med_cover" ) {
 							coverImage.source = node.firstChild.nodeValue;
 						} else if( node.nodeName === "songid" ) {
-							songId = node.firstChild.nodeValue;
+							window.songId = node.firstChild.nodeValue;
 						} else if( node.nodeName === "title" ) {
 							print( "title: " + node.firstChild.nodeValue );
-							songTitle = node.firstChild.nodeValue;
+							window.songTitle = node.firstChild.nodeValue;
 						} else if( node.nodeName === "artist" ) {
 							print( "artist: " + node.firstChild.nodeValue );
-							artist = node.firstChild.nodeValue;
+							window.artistName = node.firstChild.nodeValue;
+						} else if( node.nodeName === "album" ) {
+							print( "album: " + node.firstChild.nodeValue );
+							window.albumTitle = node.firstChild.nodeValue;
 						}
 					}
 
 					songInfoTimer.interval = interval * 1000;
 					songTime.seconds = interval;
 					progressTimer.start();
-
-					title.songId = songId;
-					title.artist = artist;
-					title.songTitle = songTitle;
 				}
 			}
 			req.send();

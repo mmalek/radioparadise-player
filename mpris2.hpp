@@ -85,7 +85,7 @@ public:
 	void setShuffle(bool value) {}
 
 	Q_PROPERTY( QVariantMap Metadata READ metadata )
-	QVariantMap metadata() const;
+	QVariantMap metadata();
 
 	Q_PROPERTY( double Volume READ volume WRITE setVolume )
 	double volume() const;
@@ -124,10 +124,13 @@ Q_SIGNALS:
 private Q_SLOTS:
 	void onPlaybackStateChanged();
 	void onVolumeChanged();
+	void onArtistNameChanged();
+	void onSongTitleChanged();
+	void onAlbumTitleChanged();
 
 private:
 	QQuickWindow& window_;
-	QVariantMap metadata_;
+	QVariantMap metaData_;
 };
 
 #endif // MPRIS2_HPP

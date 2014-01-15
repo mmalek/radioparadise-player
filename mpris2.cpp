@@ -46,6 +46,9 @@ Mpris2::Mpris2(QQuickWindow& window, QObject* parent)
 
 	connect( &window_, SIGNAL(playbackStateChanged()), SLOT(onPlaybackStateChanged()) );
 	connect( &window_, SIGNAL(volumeChanged()), SLOT(onVolumeChanged()) );
+	connect( &window_, SIGNAL(artistNameChanged()), SLOT(onArtistNameChanged()) );
+	connect( &window_, SIGNAL(songTitleChanged()), SLOT(onSongTitleChanged()) );
+	connect( &window_, SIGNAL(albumTitleChanged()), SLOT(onAlbumTitleChanged()) );
 }
 
 void Mpris2::Raise()
@@ -96,9 +99,12 @@ QString Mpris2::playbackStatus() const
 	}
 }
 
-QVariantMap Mpris2::metadata() const
+QVariantMap Mpris2::metadata()
 {
-	return metadata_;
+	metaData_["xesam:artist"] = window_.property("artistName");
+	metaData_["xesam:title"] = window_.property("songTitle");
+	metaData_["xesam:album"] = window_.property("albumTitle");
+	return metaData_;
 }
 
 double Mpris2::volume() const
@@ -130,4 +136,22 @@ void Mpris2::onPlaybackStateChanged()
 void Mpris2::onVolumeChanged()
 {
 	EmitPropertiesChanged("Volume", volume());
+}
+
+void Mpris2::onArtistNameChanged()
+{
+	metaData_["xesam:artist"] = window_.property("artistName");
+	EmitPropertiesChanged("Metadata", metaData_);
+}
+
+void Mpris2::onSongTitleChanged()
+{
+	metaData_["xesam:title"] = window_.property("songTitle");
+	EmitPropertiesChanged("Metadata", metaData_);
+}
+
+void Mpris2::onAlbumTitleChanged()
+{
+	metaData_["xesam:album"] = window_.property("albumTitle");
+	EmitPropertiesChanged("Metadata", metaData_);
 }
