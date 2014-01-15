@@ -16,10 +16,15 @@ Window {
 
 	readonly property int playbackState: player.playbackState
 	property real volume: 0.5
+
 	property int songId;
-	property string artistName;
-	property string songTitle;
 	property string albumTitle;
+	property string artistName;
+	property string artwork;
+	property string lyrics;
+	property real rating;
+	property string songTitle;
+	property int userRating;
 
 	function stop() {
 		player.stop();
@@ -96,6 +101,8 @@ Window {
 
 			width: 64
 			height: 64
+
+			source: window.artwork
 		}
 
 		Text {
@@ -258,22 +265,25 @@ Window {
 					var root = req.responseXML.documentElement;
 					var interval
 					for( var node = root.firstChild; node; node = node.nextSibling ) {
-						if( node.nodeName === "refresh_interval" ) {
-							print( "interval: " + node.firstChild.nodeValue );
-							interval = parseInt( node.firstChild.nodeValue )
+						if( node.nodeName === "album" ) {
+							window.albumTitle = node.firstChild.nodeValue;
+						} else if( node.nodeName === "artist" ) {
+							window.artistName = node.firstChild.nodeValue;
+						} else if( node.nodeName === "lyrics" ) {
+							window.lyrics = node.firstChild.nodeValue;
 						} else if( node.nodeName === "med_cover" ) {
-							coverImage.source = node.firstChild.nodeValue;
+							window.artwork = node.firstChild.nodeValue;
+						} else if( node.nodeName === "refresh_interval" ) {
+							interval = parseInt( node.firstChild.nodeValue )
+						} else if( node.nodeName === "rating" ) {
+							window.rating = parseFloat( node.firstChild.nodeValue )
 						} else if( node.nodeName === "songid" ) {
 							window.songId = node.firstChild.nodeValue;
+						} else if( node.nodeName === "user_rating" ) {
+							if( node.firstChild )
+								window.userRating = parseInt( node.firstChild.nodeValue )
 						} else if( node.nodeName === "title" ) {
-							print( "title: " + node.firstChild.nodeValue );
 							window.songTitle = node.firstChild.nodeValue;
-						} else if( node.nodeName === "artist" ) {
-							print( "artist: " + node.firstChild.nodeValue );
-							window.artistName = node.firstChild.nodeValue;
-						} else if( node.nodeName === "album" ) {
-							print( "album: " + node.firstChild.nodeValue );
-							window.albumTitle = node.firstChild.nodeValue;
 						}
 					}
 

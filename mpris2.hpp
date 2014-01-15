@@ -124,9 +124,13 @@ Q_SIGNALS:
 private Q_SLOTS:
 	void onPlaybackStateChanged();
 	void onVolumeChanged();
-	void onArtistNameChanged();
-	void onSongTitleChanged();
 	void onAlbumTitleChanged();
+	void onArtistNameChanged();
+	void onArtworkChanged();
+	void onLyricsChanged();
+	void onRatingChanged();
+	void onSongTitleChanged();
+	void onUserRatingChanged();
 
 private:
 	QQuickWindow& window_;
