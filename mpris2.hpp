@@ -4,11 +4,14 @@
 #include <QObject>
 #include <QDBusObjectPath>
 
+class QQmlApplicationEngine;
+class QQuickWindow;
+
 class Mpris2 : public QObject
 {
 	Q_OBJECT
 public:
-	explicit Mpris2(QObject *parent = 0);
+	explicit Mpris2(QQmlApplicationEngine& engine, QObject *parent = 0);
 
 	//
 	// org.mpris.MediaPlayer2 methods
@@ -105,7 +108,7 @@ public:
 	bool canGoPrevious() const { return false; }
 
 	Q_PROPERTY( bool CanPlay READ canPlay )
-	bool canPlay() const;
+	bool canPlay() const { return true; }
 
 	Q_PROPERTY( bool CanPause READ canPause )
 	bool canPause() const { return false; }
@@ -119,9 +122,14 @@ public:
 Q_SIGNALS:
 	void Seeked(qlonglong position);
 
-private:
-	QVariantMap metadata_;
+private Q_SLOTS:
+	void onPlaybackStateChanged();
+	void onVolumeChanged();
 
+private:
+	QQmlApplicationEngine& engine_;
+	QQuickWindow* window_;
+	QVariantMap metadata_;
 };
 
 #endif // MPRIS2_HPP

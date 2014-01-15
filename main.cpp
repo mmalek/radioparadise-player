@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 	app.setWindowIcon(QIcon("qrc:///images/logo.png"));
 
 #ifdef BUILD_MPRIS
-	Mpris2 mpris2;
+	Mpris2 mpris2(engine);
 #endif // BUILD_MPRIS
 
 	return app.exec();

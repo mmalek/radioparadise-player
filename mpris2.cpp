@@ -1,19 +1,36 @@
-
+﻿
 #include "mpris2.hpp"
 #include "mpris2_player.h"
 #include "mpris2_root.h"
 
+#include <QQmlApplicationEngine>
+#include <QQuickItem>
+#include <QQuickWindow>
 #include <QDBusConnection>
+#include <QMediaPlayer>
+#include <QWidget>
 
 namespace
 {
 	const char* MPRIS2_SERVICE_NAME = "org.mpris.MediaPlayer2.radioparadise-player";
 	const char* MPRIS2_OBJECT_PATH = "/org/mpris/MediaPlayer2";
+
+	void EmitPropertiesChanged(const QString& name, const QVariant& val, const QString& mprisEntity = "org.mpris.MediaPlayer2.Player")
+	{
+		QDBusMessage msg = QDBusMessage::createSignal(MPRIS2_OBJECT_PATH, "org.freedesktop.DBus.Properties", "PropertiesChanged");
+		QVariantMap map;
+		map.insert(name, val);
+		QVariantList args = QVariantList() << mprisEntity << map << QStringList();
+		msg.setArguments(args);
+		QDBusConnection::sessionBus().send(msg);
+	}
 } // namespace
 
-Mpris2::Mpris2(QObject *parent)
+Mpris2::Mpris2(QQmlApplicationEngine& engine, QObject* parent)
 :
-	QObject(parent)
+	QObject(parent),
+	engine_(engine),
+	window_(qobject_cast<QQuickWindow*>(engine_.rootObjects().front()))
 {
 	new Mpris2Root(this);
 	new Mpris2Player(this);
@@ -29,21 +46,24 @@ Mpris2::Mpris2(QObject *parent)
 		qWarning( "Cannot register D-BUS object %s", MPRIS2_SERVICE_NAME );
 		return;
 	}
+
+	connect( window_, SIGNAL(playbackStateChanged()), SLOT(onPlaybackStateChanged()) );
+	connect( window_, SIGNAL(volumeChanged()), SLOT(onVolumeChanged()) );
 }
 
 void Mpris2::Raise()
 {
-
+	window_->requestActivate();
 }
 
 void Mpris2::Quit()
 {
-
+	window_->close();
 }
 
 QString Mpris2::identity() const
 {
-	return QString();
+	return window_->title();
 }
 
 QString Mpris2::desktopEntry() const
@@ -58,18 +78,25 @@ void Mpris2::Next()
 
 void Mpris2::Stop()
 {
-
+	QMetaObject::invokeMethod( window_, "stop" );
 }
 
 void Mpris2::Play()
 {
-
+	QMetaObject::invokeMethod( window_, "play" );
 }
 
 QString Mpris2::playbackStatus() const
 {
-	// available values: "Playing", "Paused" or "Stopped"
-	return QStringLiteral( "Stopped" );
+	switch( window_->property("playbackState").toInt() )
+	{
+		case QMediaPlayer::PlayingState:
+			return QStringLiteral( "Playing" );
+		case QMediaPlayer::PausedState:
+			return QStringLiteral( "Paused" );
+		default:
+			return QStringLiteral( "Stopped" );
+	}
 }
 
 QVariantMap Mpris2::metadata() const
@@ -79,12 +106,12 @@ QVariantMap Mpris2::metadata() const
 
 double Mpris2::volume() const
 {
-	return 1.0;
+	return window_->property("volume").toDouble();
 }
 
 void Mpris2::setVolume(double value)
 {
-
+	window_->setProperty("volume", QVariant(value));
 }
 
 qlonglong Mpris2::position() const
@@ -98,7 +125,12 @@ bool Mpris2::canGoNext() const
 	return false;
 }
 
-bool Mpris2::canPlay() const
+void Mpris2::onPlaybackStateChanged()
 {
-	return false;
+	EmitPropertiesChanged("PlaybackStatus", playbackStatus());
+}
+
+void Mpris2::onVolumeChanged()
+{
+	EmitPropertiesChanged("Volume", volume());
 }

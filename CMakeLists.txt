@@ -19,6 +19,7 @@ set(sources
 
 set(libraries
 	Qt5::Qml
+	Qt5::Quick
 	Qt5::Widgets
 )
 
@@ -43,7 +44,11 @@ endif()
 
 add_executable(radioparadise-player ${sources})
 
-target_include_directories(radioparadise-player PRIVATE . ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(radioparadise-player PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}
+	${Qt5Multimedia_INCLUDE_DIRS}
+)
 
 target_link_libraries(radioparadise-player ${libraries})
 

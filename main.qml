@@ -5,6 +5,7 @@ import QtQuick.Window 2.1
 import QtMultimedia 5.0
 
 Window {
+	id: root
 	width: 500
 	height: 500 / 2.56
 	color: palette.window
@@ -13,7 +14,16 @@ Window {
 	minimumWidth: controlsRect.width + 20
 	minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + controlsRect.height + 20
 
-	SystemPalette { id: palette; colorGroup: SystemPalette.Active }
+	readonly property int playbackState: player.playbackState
+	property real volume: 0.5
+
+	function stop() {
+		player.stop();
+	}
+
+	function play() {
+		playStream(streamQuality.currentIndex);
+	}
 
 	function playStream(qualityIndex) {
 		player.source = "http://stream-tx4.radioparadise.com/rp_%1.ogg".arg( qualityModel.get( qualityIndex ).quality );
@@ -21,9 +31,11 @@ Window {
 		player.play();
 	}
 
+	SystemPalette { id: palette; colorGroup: SystemPalette.Active }
+
 	Audio {
 		id: player
-		volume: volume.value
+		volume: root.volume
 	}
 
 	Image {
@@ -141,8 +153,9 @@ Window {
 			anchors.topMargin: 10
 
 			Slider {
-				id: volume
-				value: 0.5
+				id: volumeSlider
+				value: root.volume
+				onValueChanged: root.volume = value
 			}
 
 			ComboBox {
@@ -163,14 +176,14 @@ Window {
 			Button {
 				id: stopButton
 				text: qsTr("Stop")
-				onClicked: player.stop()
+				onClicked: root.stop()
 				visible: player.playbackState === Audio.PlayingState
 			}
 
 			Button {
 				id: playButton
 				text: qsTr("Play")
-				onClicked: playStream(streamQuality.currentIndex)
+				onClicked: root.play()
 				visible: !stopButton.visible
 			}
 		}
