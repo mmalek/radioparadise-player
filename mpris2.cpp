@@ -3,12 +3,10 @@
 #include "mpris2_player.h"
 #include "mpris2_root.h"
 
-#include <QQmlApplicationEngine>
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QDBusConnection>
 #include <QMediaPlayer>
-#include <QWidget>
 
 namespace
 {
@@ -26,11 +24,10 @@ namespace
 	}
 } // namespace
 
-Mpris2::Mpris2(QQmlApplicationEngine& engine, QObject* parent)
+Mpris2::Mpris2(QQuickWindow& window, QObject* parent)
 :
 	QObject(parent),
-	engine_(engine),
-	window_(qobject_cast<QQuickWindow*>(engine_.rootObjects().front()))
+	window_(window)
 {
 	new Mpris2Root(this);
 	new Mpris2Player(this);
@@ -47,23 +44,23 @@ Mpris2::Mpris2(QQmlApplicationEngine& engine, QObject* parent)
 		return;
 	}
 
-	connect( window_, SIGNAL(playbackStateChanged()), SLOT(onPlaybackStateChanged()) );
-	connect( window_, SIGNAL(volumeChanged()), SLOT(onVolumeChanged()) );
+	connect( &window_, SIGNAL(playbackStateChanged()), SLOT(onPlaybackStateChanged()) );
+	connect( &window_, SIGNAL(volumeChanged()), SLOT(onVolumeChanged()) );
 }
 
 void Mpris2::Raise()
 {
-	window_->requestActivate();
+	window_.requestActivate();
 }
 
 void Mpris2::Quit()
 {
-	window_->close();
+	window_.close();
 }
 
 QString Mpris2::identity() const
 {
-	return window_->title();
+	return window_.title();
 }
 
 QString Mpris2::desktopEntry() const
@@ -78,17 +75,17 @@ void Mpris2::Next()
 
 void Mpris2::Stop()
 {
-	QMetaObject::invokeMethod( window_, "stop" );
+	QMetaObject::invokeMethod( &window_, "stop" );
 }
 
 void Mpris2::Play()
 {
-	QMetaObject::invokeMethod( window_, "play" );
+	QMetaObject::invokeMethod( &window_, "play" );
 }
 
 QString Mpris2::playbackStatus() const
 {
-	switch( window_->property("playbackState").toInt() )
+	switch( window_.property("playbackState").toInt() )
 	{
 		case QMediaPlayer::PlayingState:
 			return QStringLiteral( "Playing" );
@@ -106,12 +103,12 @@ QVariantMap Mpris2::metadata() const
 
 double Mpris2::volume() const
 {
-	return window_->property("volume").toDouble();
+	return window_.property("volume").toDouble();
 }
 
 void Mpris2::setVolume(double value)
 {
-	window_->setProperty("volume", QVariant(value));
+	window_.setProperty("volume", QVariant(value));
 }
 
 qlonglong Mpris2::position() const

@@ -4,14 +4,13 @@
 #include <QObject>
 #include <QDBusObjectPath>
 
-class QQmlApplicationEngine;
 class QQuickWindow;
 
 class Mpris2 : public QObject
 {
 	Q_OBJECT
 public:
-	explicit Mpris2(QQmlApplicationEngine& engine, QObject *parent = 0);
+	explicit Mpris2(QQuickWindow& window, QObject *parent = 0);
 
 	//
 	// org.mpris.MediaPlayer2 methods
@@ -127,8 +126,7 @@ private Q_SLOTS:
 	void onVolumeChanged();
 
 private:
-	QQmlApplicationEngine& engine_;
-	QQuickWindow* window_;
+	QQuickWindow& window_;
 	QVariantMap metadata_;
 };
 
