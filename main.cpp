@@ -1,8 +1,9 @@
-#include <QtGui/QIcon>
-#include <QtWidgets/QApplication>
-#include <QtQml/QQmlApplicationEngine>
-#include <QtQuick/QQuickWindow>
+#include <QIcon>
+#include <QApplication>
+#include <QQmlApplicationEngine>
+#include <QQuickWindow>
 
+#include "artworkdownloader.hpp"
 #include "mpris2.hpp"
 #include "config.hpp"
 
@@ -14,6 +15,8 @@ int main(int argc, char *argv[])
 	if(QQuickWindow* window = qobject_cast<QQuickWindow*>(engine.rootObjects().front()))
 	{
 		window->setIcon(QIcon("qrc:///images/logo.png"));
+
+		ArtworkDownloader artworkDownloader(*window);
 
 #ifdef BUILD_MPRIS
 		Mpris2 mpris2(*window, app.applicationPid());

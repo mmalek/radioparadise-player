@@ -49,7 +49,7 @@ Mpris2::Mpris2(QQuickWindow& window, qint64 pid, QObject* parent)
 	connect( &window_, SIGNAL(volumeChanged()), SLOT(onVolumeChanged()) );
 	connect( &window_, SIGNAL(albumTitleChanged()), SLOT(onAlbumTitleChanged()) );
 	connect( &window_, SIGNAL(artistNameChanged()), SLOT(onArtistNameChanged()) );
-	connect( &window_, SIGNAL(artworkChanged()), SLOT(onArtworkChanged()) );
+	connect( &window_, SIGNAL(artworkLocalFileChanged()), SLOT(onArtworkLocalFileChanged()) );
 	connect( &window_, SIGNAL(lyricsChanged()), SLOT(onLyricsChanged()) );
 	connect( &window_, SIGNAL(ratingChanged()), SLOT(onRatingChanged()) );
 	connect( &window_, SIGNAL(songTitleChanged()), SLOT(onSongTitleChanged()) );
@@ -108,7 +108,7 @@ QVariantMap Mpris2::metadata()
 {
 	metaData_["xesam:album"] = window_.property("albumTitle");
 	metaData_["xesam:artist"] = window_.property("artistName");
-//	metaData_["mpris:artUrl"] = window_.property("artwork");
+	metaData_["mpris:artUrl"] = window_.property("artworkLocalFile").toString();
 	metaData_["xesam:asText"] = window_.property("lyrics");
 	metaData_["xesam:autoRating"] = window_.property("rating").toDouble()/10.0;
 	metaData_["xesam:title"] = window_.property("songTitle");
@@ -159,10 +159,10 @@ void Mpris2::onArtistNameChanged()
 	EmitPropertiesChanged("Metadata", metaData_);
 }
 
-void Mpris2::onArtworkChanged()
+void Mpris2::onArtworkLocalFileChanged()
 {
-//	metaData_["mpris:artUrl"] = window_.property("artwork");
-//	EmitPropertiesChanged("Metadata", metaData_);
+	metaData_["mpris:artUrl"] = window_.property("artworkLocalFile").toString();
+	EmitPropertiesChanged("Metadata", metaData_);
 }
 
 void Mpris2::onLyricsChanged()

@@ -20,7 +20,8 @@ Window {
 	property int songId;
 	property string albumTitle;
 	property string artistName;
-	property string artwork;
+	property url artworkUrl;
+	property url artworkLocalFile;
 	property string lyrics;
 	property real rating;
 	property string songTitle;
@@ -102,7 +103,7 @@ Window {
 			width: 64
 			height: 64
 
-			source: window.artwork
+			source: window.artworkLocalFile
 		}
 
 		Text {
@@ -272,7 +273,7 @@ Window {
 						} else if( node.nodeName === "lyrics" ) {
 							window.lyrics = node.firstChild.nodeValue;
 						} else if( node.nodeName === "med_cover" ) {
-							window.artwork = node.firstChild.nodeValue;
+							window.artworkUrl = node.firstChild.nodeValue;
 						} else if( node.nodeName === "refresh_interval" ) {
 							interval = parseInt( node.firstChild.nodeValue )
 						} else if( node.nodeName === "rating" ) {

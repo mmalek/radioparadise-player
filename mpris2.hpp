@@ -126,7 +126,7 @@ private Q_SLOTS:
 	void onVolumeChanged();
 	void onAlbumTitleChanged();
 	void onArtistNameChanged();
-	void onArtworkChanged();
+	void onArtworkLocalFileChanged();
 	void onLyricsChanged();
 	void onRatingChanged();
 	void onSongTitleChanged();

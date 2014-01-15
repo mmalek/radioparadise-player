@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project(radioparadise-player)
 
 find_package(Qt5
-	REQUIRED COMPONENTS Multimedia Quick Widgets
+	REQUIRED COMPONENTS Multimedia Network Quick Widgets
 	OPTIONAL_COMPONENTS DBus
 )
 
@@ -13,11 +13,13 @@ endif()
 configure_file(config.hpp.in config.hpp)
 
 set(sources
-	main.cpp
 	main.qml
+	main.cpp
+	artworkdownloader.cpp
 )
 
 set(libraries
+	Qt5::Network
 	Qt5::Qml
 	Qt5::Quick
 	Qt5::Widgets
