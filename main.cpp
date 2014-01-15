@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 		window->setIcon(QIcon("qrc:///images/logo.png"));
 
 #ifdef BUILD_MPRIS
-		Mpris2 mpris2(*window);
+		Mpris2 mpris2(*window, app.applicationPid());
 #endif // BUILD_MPRIS
 
 		return app.exec();

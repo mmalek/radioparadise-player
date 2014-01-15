@@ -10,7 +10,7 @@
 
 namespace
 {
-	const char* MPRIS2_SERVICE_NAME = "org.mpris.MediaPlayer2.radioparadise-player";
+	const char* MPRIS2_SERVICE_NAME = "org.mpris.MediaPlayer2.radioparadise-player-%1";
 	const char* MPRIS2_OBJECT_PATH = "/org/mpris/MediaPlayer2";
 
 	void EmitPropertiesChanged(const QString& name, const QVariant& val, const QString& mprisEntity = "org.mpris.MediaPlayer2.Player")
@@ -24,7 +24,7 @@ namespace
 	}
 } // namespace
 
-Mpris2::Mpris2(QQuickWindow& window, QObject* parent)
+Mpris2::Mpris2(QQuickWindow& window, qint64 pid, QObject* parent)
 :
 	QObject(parent),
 	window_(window)
@@ -32,15 +32,16 @@ Mpris2::Mpris2(QQuickWindow& window, QObject* parent)
 	new Mpris2Root(this);
 	new Mpris2Player(this);
 
-	if(!QDBusConnection::sessionBus().registerService(MPRIS2_SERVICE_NAME))
+	const QString serviceName = QString(MPRIS2_SERVICE_NAME).arg(pid);
+	if(!QDBusConnection::sessionBus().registerService(serviceName))
 	{
-		qWarning( "Cannot register D-BUS service %s", MPRIS2_SERVICE_NAME );
+		qWarning() << "Cannot register D-BUS service " << serviceName;
 		return;
 	}
 
 	if(!QDBusConnection::sessionBus().registerObject(MPRIS2_OBJECT_PATH, this))
 	{
-		qWarning( "Cannot register D-BUS object %s", MPRIS2_SERVICE_NAME );
+		qWarning() << "Cannot register D-BUS object " << MPRIS2_OBJECT_PATH;
 		return;
 	}
 

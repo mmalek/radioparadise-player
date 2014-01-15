@@ -10,7 +10,7 @@ class Mpris2 : public QObject
 {
 	Q_OBJECT
 public:
-	explicit Mpris2(QQuickWindow& window, QObject *parent = 0);
+	explicit Mpris2(QQuickWindow& window, qint64 pid, QObject *parent = 0);
 
 	//
 	// org.mpris.MediaPlayer2 methods
