@@ -17,15 +17,17 @@ Window {
 	readonly property int playbackState: player.playbackState
 	property real volume: 0.5
 
-	property int songId;
-	property string albumTitle;
-	property string artistName;
-	property url artworkUrl;
-	property url artworkLocalFile;
-	property string lyrics;
-	property real rating;
-	property string songTitle;
-	property int userRating;
+	property int songId
+	property string albumTitle
+	property string artistName
+	property url artworkUrl
+	property url artworkLocalFile
+	property string lyrics
+	property real rating
+	property int songPosition: 0 // in seconds
+	property int songLength: 0 // in seconds
+	property string songTitle
+	property int userRating
 
 	function stop() {
 		player.stop();
@@ -135,7 +137,7 @@ Window {
 			anchors.right: parent.right
 			anchors.rightMargin: 10
 
-			property int seconds: 0.0
+			property int seconds: window.songLength - window.songPosition
 
 			text: "(%1:%2)".arg( leadingZero( Math.floor( seconds/60 ) ) ).arg( leadingZero( seconds % 60 ) )
 			font.pointSize: title.font.pointSize
@@ -252,7 +254,7 @@ Window {
 
 	Timer {
 		id: songInfoTimer
-		interval: 0
+		interval: window.songLength * 1000
 		running: true
 		repeat: true
 		triggeredOnStart: true
@@ -264,7 +266,6 @@ Window {
 			req.onreadystatechange = function() {
 				if( req.readyState === XMLHttpRequest.DONE ) {
 					var root = req.responseXML.documentElement;
-					var interval
 					for( var node = root.firstChild; node; node = node.nextSibling ) {
 						if( node.nodeName === "album" ) {
 							window.albumTitle = node.firstChild.nodeValue;
@@ -275,22 +276,20 @@ Window {
 						} else if( node.nodeName === "med_cover" ) {
 							window.artworkUrl = node.firstChild.nodeValue;
 						} else if( node.nodeName === "refresh_interval" ) {
-							interval = parseInt( node.firstChild.nodeValue )
+							window.songPosition = 0;
+							window.songLength = parseInt( node.firstChild.nodeValue );
+							progressTimer.start();
 						} else if( node.nodeName === "rating" ) {
-							window.rating = parseFloat( node.firstChild.nodeValue )
+							window.rating = parseFloat( node.firstChild.nodeValue );
 						} else if( node.nodeName === "songid" ) {
 							window.songId = node.firstChild.nodeValue;
 						} else if( node.nodeName === "user_rating" ) {
 							if( node.firstChild )
-								window.userRating = parseInt( node.firstChild.nodeValue )
+								window.userRating = parseInt( node.firstChild.nodeValue );
 						} else if( node.nodeName === "title" ) {
 							window.songTitle = node.firstChild.nodeValue;
 						}
 					}
-
-					songInfoTimer.interval = interval * 1000;
-					songTime.seconds = interval;
-					progressTimer.start();
 				}
 			}
 			req.send();
@@ -302,6 +301,6 @@ Window {
 		interval: 1000
 		running: false
 		repeat: true
-		onTriggered: { --songTime.seconds }
+		onTriggered: { ++window.songPosition }
 	}
 }

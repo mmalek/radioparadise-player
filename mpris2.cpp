@@ -52,6 +52,7 @@ Mpris2::Mpris2(QQuickWindow& window, qint64 pid, QObject* parent)
 	connect( &window_, SIGNAL(artworkLocalFileChanged()), SLOT(onArtworkLocalFileChanged()) );
 	connect( &window_, SIGNAL(lyricsChanged()), SLOT(onLyricsChanged()) );
 	connect( &window_, SIGNAL(ratingChanged()), SLOT(onRatingChanged()) );
+	connect( &window_, SIGNAL(songLengthChanged()), SLOT(onSongLengthChanged()) );
 	connect( &window_, SIGNAL(songTitleChanged()), SLOT(onSongTitleChanged()) );
 	connect( &window_, SIGNAL(userRatingChanged()), SLOT(onUserRatingChanged()) );
 }
@@ -111,6 +112,7 @@ QVariantMap Mpris2::metadata()
 	metaData_["mpris:artUrl"] = window_.property("artworkLocalFile").toString();
 	metaData_["xesam:asText"] = window_.property("lyrics");
 	metaData_["xesam:autoRating"] = window_.property("rating").toDouble()/10.0;
+	metaData_["mpris:length"] = window_.property("songLength").toLongLong() * 1000000ll;
 	metaData_["xesam:title"] = window_.property("songTitle");
 	metaData_["xesam:userRating"] = window_.property("userRating").toDouble()/10.0;
 	return metaData_;
@@ -128,7 +130,7 @@ void Mpris2::setVolume(double value)
 
 qlonglong Mpris2::position() const
 {
-	return 0;
+	return window_.property("songPosition").toLongLong() * 1000000ll;
 }
 
 bool Mpris2::canGoNext() const
@@ -174,6 +176,12 @@ void Mpris2::onLyricsChanged()
 void Mpris2::onRatingChanged()
 {
 	metaData_["xesam:autoRating"] = window_.property("rating").toDouble()/10.0;
+	EmitPropertiesChanged("Metadata", metaData_);
+}
+
+void Mpris2::onSongLengthChanged()
+{
+	metaData_["mpris:length"] = window_.property("songLength").toLongLong() * 1000000ll;
 	EmitPropertiesChanged("Metadata", metaData_);
 }
 
