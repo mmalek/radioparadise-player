@@ -254,14 +254,13 @@ Window {
 
 	Timer {
 		id: songInfoTimer
-		interval: window.songLength * 1000
 		running: true
 		repeat: true
 		triggeredOnStart: true
+		property var request: new XMLHttpRequest()
 		onTriggered: {
-			progressTimer.stop();
-
-			var req = new XMLHttpRequest();
+			var req = request;
+			req.abort();
 			req.open( "GET", "http://radioparadise.com/ajax_xml_song_info.php?song_id=now" );
 			req.onreadystatechange = function() {
 				if( req.readyState === XMLHttpRequest.DONE ) {
@@ -276,16 +275,17 @@ Window {
 						} else if( node.nodeName === "med_cover" ) {
 							window.artworkUrl = node.firstChild.nodeValue;
 						} else if( node.nodeName === "refresh_interval" ) {
+							progressTimer.stop();
 							window.songPosition = 0;
 							window.songLength = parseInt( node.firstChild.nodeValue );
+							interval = window.songLength * 1000;
 							progressTimer.start();
 						} else if( node.nodeName === "rating" ) {
 							window.rating = parseFloat( node.firstChild.nodeValue );
 						} else if( node.nodeName === "songid" ) {
 							window.songId = node.firstChild.nodeValue;
-						} else if( node.nodeName === "user_rating" ) {
-							if( node.firstChild )
-								window.userRating = parseInt( node.firstChild.nodeValue );
+						} else if( node.nodeName === "user_rating" && node.firstChild ) {
+							window.userRating = parseInt( node.firstChild.nodeValue );
 						} else if( node.nodeName === "title" ) {
 							window.songTitle = node.firstChild.nodeValue;
 						}
@@ -293,6 +293,7 @@ Window {
 				}
 			}
 			req.send();
+			interval = 5000; // timeout
 		}
 	}
 
@@ -301,6 +302,11 @@ Window {
 		interval: 1000
 		running: false
 		repeat: true
-		onTriggered: { ++window.songPosition }
+		onTriggered: {
+			if( window.songPosition < window.songLength )
+				++window.songPosition;
+			else
+				progressTimer.stop();
+		}
 	}
 }
