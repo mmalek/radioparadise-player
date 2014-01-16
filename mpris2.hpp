@@ -113,7 +113,7 @@ public:
 	bool canPause() const { return false; }
 
 	Q_PROPERTY( bool CanSeek READ canSeek )
-	bool canSeek() const { return false; }
+	bool canSeek() const { return true; }
 
 	Q_PROPERTY( bool CanControl READ canControl )
 	bool canControl() const { return true; }
