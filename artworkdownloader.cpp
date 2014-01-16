@@ -2,11 +2,13 @@
 
 #include <QNetworkReply>
 #include <QQuickWindow>
+#include <QTemporaryFile>
 
 ArtworkDownloader::ArtworkDownloader(QQuickWindow& window, QObject *parent)
 :
 	QObject(parent),
-	window_(window)
+	window_(window),
+	temporaryFile_(0)
 {
 	connect(&window_, SIGNAL(artworkUrlChanged()), SLOT(onArtworkUrlChanged()));
 	connect(&networkAccessManager_, SIGNAL(finished(QNetworkReply*)), SLOT(onDownloadFinished(QNetworkReply*)));
@@ -30,11 +32,17 @@ void ArtworkDownloader::onDownloadFinished(QNetworkReply* reply)
 	}
 	else
 	{
-		if( temporaryFile_.open() )
+		if( temporaryFile_ )
 		{
-			temporaryFile_.write(reply->readAll());
-			temporaryFile_.close();
-			window_.setProperty("artworkLocalFile", QUrl::fromLocalFile(temporaryFile_.fileName()));
+			temporaryFile_->deleteLater();
+		}
+
+		temporaryFile_ = new QTemporaryFile( this );
+		if( temporaryFile_->open() )
+		{
+			temporaryFile_->write(reply->readAll());
+			temporaryFile_->close();
+			window_.setProperty("artworkLocalFile", QUrl::fromLocalFile(temporaryFile_->fileName()));
 		}
 		else
 		{

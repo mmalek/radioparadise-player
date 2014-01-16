@@ -3,10 +3,10 @@
 
 #include <QObject>
 #include <QNetworkAccessManager>
-#include <QTemporaryFile>
 
 class QNetworkReply;
 class QQuickWindow;
+class QTemporaryFile;
 
 class ArtworkDownloader : public QObject
 {
@@ -21,7 +21,7 @@ private Q_SLOTS:
 private:
 	QQuickWindow& window_;
 	QNetworkAccessManager networkAccessManager_;
-	QTemporaryFile temporaryFile_;
+	QTemporaryFile* temporaryFile_;
 };
 
 #endif // ARTWORKDOWNLOADER_HPP
