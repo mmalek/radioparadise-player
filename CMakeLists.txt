@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(radioparadise-player)
 
+if(CMAKE_COMPILER_IS_GNUCXX)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wpedantic -Werror")
+endif()
+
+add_definitions(-DQT_NO_KEYWORDS)
+
 find_package(Qt5
 	REQUIRED COMPONENTS Multimedia Network Quick Widgets
 	OPTIONAL_COMPONENTS DBus

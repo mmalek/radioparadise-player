@@ -61,9 +61,9 @@ public:
 	void PlayPause() {}
 	void Stop();
 	void Play();
-	void Seek(qlonglong offset) {}
-	void SetPosition(const QDBusObjectPath& trackId, qlonglong offset) {}
-	void OpenUri(const QString& uri) {}
+	void Seek(qlonglong /*offset*/) {}
+	void SetPosition(const QDBusObjectPath& /*trackId*/, qlonglong /*offset*/) {}
+	void OpenUri(const QString& /*uri*/) {}
 
 	//
 	// org.mpris.MediaPlayer2.Player properties
@@ -74,15 +74,15 @@ public:
 
 	Q_PROPERTY( QString LoopStatus READ loopStatus WRITE setLoopStatus )
 	QString loopStatus() const { return QStringLiteral( "None" ); }
-	void setLoopStatus(const QString& value) {}
+	void setLoopStatus(const QString& /*value*/) {}
 
 	Q_PROPERTY( double Rate READ rate WRITE setRate )
 	double rate() const { return 1.0; }
-	void setRate(double value) {}
+	void setRate(double /*value*/) {}
 
 	Q_PROPERTY( bool Shuffle READ shuffle WRITE setShuffle )
 	bool shuffle() const { return false; }
-	void setShuffle(bool value) {}
+	void setShuffle(bool /*value*/) {}
 
 	Q_PROPERTY( QVariantMap Metadata READ metadata )
 	QVariantMap metadata();
