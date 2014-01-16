@@ -111,10 +111,25 @@ QVariantMap Mpris2::metadata()
 	metaData_["xesam:artist"] = window_.property("artistName");
 	metaData_["mpris:artUrl"] = window_.property("artworkLocalFile").toString();
 	metaData_["xesam:asText"] = window_.property("lyrics");
-	metaData_["xesam:autoRating"] = window_.property("rating").toDouble()/10.0;
 	metaData_["mpris:length"] = window_.property("songLength").toLongLong() * 1000000ll;
 	metaData_["xesam:title"] = window_.property("songTitle");
-	metaData_["xesam:userRating"] = window_.property("userRating").toDouble()/10.0;
+
+	const double rating = window_.property("rating").toDouble()/10.0;
+	if( rating > 0.0 )
+	{
+		metaData_["xesam:autoRating"] = rating;
+	}
+
+	const double userRating = window_.property("userRating").toDouble()/10.0;
+	if( userRating > 0.0 )
+	{
+		metaData_["xesam:userRating"] = userRating;
+	}
+	else if( rating > 0.0 )
+	{
+		metaData_["xesam:userRating"] = rating;
+	}
+
 	return metaData_;
 }
 
@@ -175,8 +190,16 @@ void Mpris2::onLyricsChanged()
 
 void Mpris2::onRatingChanged()
 {
-	metaData_["xesam:autoRating"] = window_.property("rating").toDouble()/10.0;
-	EmitPropertiesChanged("Metadata", metaData_);
+	const double rating = window_.property("rating").toDouble()/10.0;
+	if( rating > 0.0 )
+	{
+		metaData_["xesam:autoRating"] = rating;
+		if( window_.property("userRating").toDouble() <= 0.0 )
+		{
+			metaData_["xesam:userRating"] = rating;
+		}
+		EmitPropertiesChanged("Metadata", metaData_);
+	}
 }
 
 void Mpris2::onSongLengthChanged()
@@ -193,6 +216,10 @@ void Mpris2::onSongTitleChanged()
 
 void Mpris2::onUserRatingChanged()
 {
-	metaData_["xesam:userRating"] = window_.property("userRating").toDouble()/10.0;
-	EmitPropertiesChanged("Metadata", metaData_);
+	const double userRating = window_.property("userRating").toDouble()/10.0;
+	if( userRating > 0.0 )
+	{
+		metaData_["xesam:userRating"] = userRating;
+		EmitPropertiesChanged("Metadata", metaData_);
+	}
 }
