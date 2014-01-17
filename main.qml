@@ -10,7 +10,6 @@ Window {
 	height: 500 / 2.56
 	color: palette.window
 	visible: true
-	title: qsTr("Radio Paradise")
 	minimumWidth: controlsRect.width + 20
 	minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + controlsRect.height + 20
 

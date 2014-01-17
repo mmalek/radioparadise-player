@@ -10,11 +10,15 @@
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
+	app.setApplicationName(QStringLiteral("Radio Paradise"));
+	app.setApplicationVersion("1.0");
+
 	QQmlApplicationEngine engine(QUrl("qrc:///qml/main.qml"));
 
 	if(QQuickWindow* window = qobject_cast<QQuickWindow*>(engine.rootObjects().front()))
 	{
 		window->setIcon(QIcon(":/images/logo.png"));
+		window->setTitle(app.applicationName());
 
 		ArtworkDownloader artworkDownloader(*window);
 
