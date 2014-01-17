@@ -16,6 +16,8 @@ if( Qt5DBus_FOUND )
 	set( BUILD_MPRIS TRUE )
 endif()
 
+set(DESKTOP_FILE_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/share/applications/radioparadise-player.desktop")
+
 configure_file(config.hpp.in config.hpp)
 
 set(sources
@@ -61,3 +63,9 @@ target_include_directories(radioparadise-player PRIVATE
 target_link_libraries(radioparadise-player ${libraries})
 
 set_property(TARGET radioparadise-player PROPERTY AUTOMOC TRUE)
+
+if(UNIX)
+	install(TARGETS radioparadise-player DESTINATION bin)
+	install(FILES logo.png DESTINATION share/pixmaps RENAME radioparadise-player.png)
+	install(FILES radioparadise-player.desktop DESTINATION share/applications)
+endif()

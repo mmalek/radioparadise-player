@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Radio Paradise
+Comment=Radio Paradise Player
+Exec=radioparadise-player
+Icon=radioparadise-player.png
+Terminal=false
+Type=Application
+Encoding=UTF-8
+Categories=AudioVideo;Player;Application;Qt;
+

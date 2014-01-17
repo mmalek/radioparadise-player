@@ -2,6 +2,7 @@
 #include "mpris2.hpp"
 #include "mpris2_player.h"
 #include "mpris2_root.h"
+#include "config.hpp"
 
 #include <QQuickItem>
 #include <QQuickWindow>
@@ -74,7 +75,7 @@ QString Mpris2::identity() const
 
 QString Mpris2::desktopEntry() const
 {
-	return QString();
+	return QStringLiteral(DESKTOP_FILE_INSTALL_PATH);
 }
 
 void Mpris2::Next()
