@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 
 	if(QQuickWindow* window = qobject_cast<QQuickWindow*>(engine.rootObjects().front()))
 	{
-		window->setIcon(QIcon("qrc:///images/logo.png"));
+		window->setIcon(QIcon(":/images/logo.png"));
 
 		ArtworkDownloader artworkDownloader(*window);
 
