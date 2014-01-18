@@ -83,6 +83,11 @@ void Mpris2::Next()
 	// Implement PSD (Play Something Different) feature here
 }
 
+void Mpris2::PlayPause()
+{
+	QMetaObject::invokeMethod( &window_, "play" );
+}
+
 void Mpris2::Stop()
 {
 	QMetaObject::invokeMethod( &window_, "stop" );

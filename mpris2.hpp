@@ -58,7 +58,7 @@ public:
 	void Next();
 	void Previous() {}
 	void Pause() {}
-	void PlayPause() {}
+	void PlayPause();
 	void Stop();
 	void Play();
 	void Seek(qlonglong /*offset*/) {}
