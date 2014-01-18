@@ -16,8 +16,6 @@ if( Qt5DBus_FOUND )
 	set( BUILD_MPRIS TRUE )
 endif()
 
-set(DESKTOP_FILE_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/share/applications/radioparadise-player.desktop")
-
 configure_file(config.hpp.in config.hpp)
 
 set(sources
