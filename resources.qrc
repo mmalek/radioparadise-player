@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/qml">
         <file>main.qml</file>
+        <file>HdBackground.qml</file>
     </qresource>
     <qresource prefix="/images">
         <file>logo_hd.png</file>

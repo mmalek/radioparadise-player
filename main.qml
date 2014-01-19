@@ -1,8 +1,9 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
 import QtQuick.Window 2.1
 import QtMultimedia 5.0
+import "."
 
 Window {
 	id: window
@@ -49,13 +50,9 @@ Window {
 		volume: window.volume
 	}
 
-	Image {
-		id: backgroundImage
-
-		anchors.fill: parent
-
-		fillMode: Image.PreserveAspectCrop
+	HdBackground {
 		visible: hdSwitch.checked
+		anchors.fill: parent
 	}
 
 	Image {
@@ -232,23 +229,6 @@ Window {
 		anchors.top: parent.top
 		anchors.rightMargin: 10
 		anchors.topMargin: 10
-	}
-
-	Timer {
-		interval: 15000;
-		running: hdSwitch.checked
-		repeat: true
-		triggeredOnStart: true
-		onTriggered: {
-			var req = new XMLHttpRequest();
-			req.open( "GET", "http://radioparadise.com/readtxt.php" );
-			req.onreadystatechange = function() {
-				if( req.readyState === XMLHttpRequest.DONE ) {
-					backgroundImage.source = req.responseText.trim();
-				}
-			}
-			req.send();
-		}
 	}
 
 	Timer {
