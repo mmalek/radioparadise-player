@@ -13,6 +13,7 @@ Window {
 	visible: true
 	minimumWidth: controlsRect.width + 20
 	minimumHeight: radioParadiseLogo.y + radioParadiseLogo.height + controlsRect.height + 20
+	visibility: hdSwitch.checked ? Window.FullScreen : Window.AutomaticVisibility
 
 	readonly property int playbackState: player.playbackState
 	property real volume: 0.5
