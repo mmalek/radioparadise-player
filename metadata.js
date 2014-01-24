@@ -3,58 +3,76 @@ var req = new XMLHttpRequest();
 
 function parseSongInfo(document)
 {
-	var albumTitle;
-	var artworkUrl;
-	var artistName;
-	var lyrics;
-	var rating;
-	var songId;
-	var songLength;
-	var songTitle;
-	var userRating;
+	var metadata = {
+		albumTitle: "",
+		artworkUrl: "",
+		artistName: "",
+		lyrics: "",
+		rating: 0.0,
+		songId: 0,
+		songLength: 0,
+		songTitle: "",
+		userRating: 0,
+		prevSongId: 0
+	};
 
 	for( var node = document.firstChild; node; node = node.nextSibling ) {
 		if( node.nodeName === "album" ) {
-			albumTitle = node.firstChild.nodeValue;
+			metadata.albumTitle = node.firstChild.nodeValue;
 		} else if( node.nodeName === "artist" ) {
-			artistName = node.firstChild.nodeValue;
+			metadata.artistName = node.firstChild.nodeValue;
 		} else if( node.nodeName === "lyrics" ) {
-			lyrics = node.firstChild.nodeValue;
+			metadata.lyrics = node.firstChild.nodeValue;
 		} else if( node.nodeName === "med_cover" ) {
-			artworkUrl = node.firstChild.nodeValue;
-		} else if( node.nodeName === "refresh_interval" ) {
-			songLength = parseInt( node.firstChild.nodeValue );
-			songInfoTimer.interval = songLength * 1000;
+			metadata.artworkUrl = node.firstChild.nodeValue;
+		} else if( node.nodeName === "prev_song" ) {
+			metadata.prevSongId = parseInt( node.firstChild.nodeValue );
+		} else if( node.nodeName === "refresh_interval" && node.firstChild ) {
+			metadata.songLength = parseInt( node.firstChild.nodeValue );
 		} else if( node.nodeName === "rating" ) {
-			rating = parseFloat( node.firstChild.nodeValue );
+			metadata.rating = parseFloat( node.firstChild.nodeValue );
 		} else if( node.nodeName === "songid" ) {
-			songId = parseInt( node.firstChild.nodeValue );
+			metadata.songId = parseInt( node.firstChild.nodeValue );
 		} else if( node.nodeName === "user_rating" && node.firstChild ) {
-			userRating = parseInt( node.firstChild.nodeValue );
+			metadata.userRating = parseInt( node.firstChild.nodeValue );
 		} else if( node.nodeName === "title" ) {
-			songTitle = node.firstChild.nodeValue;
+			metadata.songTitle = node.firstChild.nodeValue;
 		}
 	}
 
-	if( songId > 3 ) {
-		progressTimer.stop();
-		window.albumTitle = albumTitle;
-		window.artistName = artistName;
-		window.artworkUrl = artworkUrl;
-		window.lyrics = lyrics;
-		window.rating = rating;
-		window.songId = songId;
-		window.songLength = songLength;
-		window.songPosition = 0;
-		window.songTitle = songTitle;
-		window.userRating = userRating ? userRating : 0;
+	return metadata;
+}
 
-		historyModel.insert( 0, { artistName: artistName, songTitle: songTitle, songId: songId } );
+function updatePreviousSong(prevSongIndex,prevSongId)
+{
+	if(prevSongIndex < 4 && ( prevSongIndex >= historyModel.count || historyModel.get(prevSongIndex).songId !== prevSongId )) {
+		var req = new XMLHttpRequest();
+		req.open( "GET", "http://radioparadise.com/ajax_xml_song_info.php?song_id=" + prevSongId );
+		req.onreadystatechange = function(){
+			if( req.readyState === XMLHttpRequest.DONE && req.responseXML ) {
+				var metadata = parseSongInfo(req.responseXML.documentElement);
+				historyModel.set(prevSongIndex,metadata);
+				updatePreviousSong(prevSongIndex+1,metadata.prevSongId);
+			}
+		}
+		req.send();
+	}
+}
+
+function setCurrentSong(metadata)
+{
+	if( metadata.songId > 3 ) {
+		progressTimer.stop();
+		window.songPosition = 0;
+		historyModel.insert( 0, metadata );
 		if( historyModel.count > 4 ) {
 			historyModel.remove( 4, historyModel.count - 4 );
 		}
+		updatePreviousSong(1,metadata.prevSongId);
 		progressTimer.start();
 	}
+
+	songInfoTimer.interval = ( metadata.songLength > 0 ? metadata.songLength : 1 ) * 1000;
 }
 
 function fetchMetadata()
@@ -63,7 +81,8 @@ function fetchMetadata()
 	req.open( "GET", "http://radioparadise.com/ajax_xml_song_info.php?song_id=now" );
 	req.onreadystatechange = function(){
 		if( req.readyState === XMLHttpRequest.DONE && req.responseXML ) {
-			parseSongInfo(req.responseXML.documentElement);
+			var metadata = parseSongInfo(req.responseXML.documentElement);
+			setCurrentSong(metadata);
 		}
 	}
 	songInfoTimer.interval = 5000; // timeout

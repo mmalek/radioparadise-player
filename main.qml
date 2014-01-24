@@ -19,17 +19,17 @@ Window {
 	readonly property int playbackState: player.playbackState
 	property real volume: 0.5
 
-	property int songId
-	property string albumTitle
-	property string artistName
-	property url artworkUrl
+	property int songId: historyModel.count > 0 ? historyModel.get(0).songId : 0
+	property string albumTitle: historyModel.count > 0 ? historyModel.get(0).albumTitle : ""
+	property url artworkUrl: historyModel.count > 0 ? historyModel.get(0).artworkUrl : ""
 	property url artworkLocalFile
-	property string lyrics
-	property real rating
+	property string artistName: historyModel.count > 0 ? historyModel.get(0).artistName : ""
+	property string lyrics: historyModel.count > 0 ? historyModel.get(0).lyrics : ""
+	property real rating: historyModel.count > 0 ? historyModel.get(0).rating : 0.0
 	property int songPosition: 0 // in seconds
-	property int songLength: 0 // in seconds
-	property string songTitle
-	property int userRating
+	property int songLength: historyModel.count > 0 ? historyModel.get(0).songLength : 0 // in seconds
+	property string songTitle: historyModel.count > 0 ? historyModel.get(0).songTitle : ""
+	property int userRating: historyModel.count > 0 ? historyModel.get(0).userRating : 0
 
 	function stop() {
 		player.stop();
