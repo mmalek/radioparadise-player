@@ -19,6 +19,7 @@ configure_file(config.hpp.in config.hpp)
 set(sources
 	HdBackground.qml
 	main.qml
+	metadata.js
 	main.cpp
 	artworkdownloader.cpp
 )

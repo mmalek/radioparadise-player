@@ -3,6 +3,7 @@ import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
 import QtQuick.Window 2.1
 import QtMultimedia 5.0
+import "metadata.js" as Metadata
 import "."
 
 Window {
@@ -78,6 +79,7 @@ Window {
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 10
+		property color textColor
 
 		width: controlsLayout.width + 25
 		height: coverImage.height + controlsLayout.height + 30
@@ -105,41 +107,64 @@ Window {
 			source: window.artworkLocalFile
 		}
 
-		Text {
-			id: title
+		ListModel {
+			id: historyModel
+		}
 
-			anchors.verticalCenter: coverImage.verticalCenter
+		Component {
+			id: historyDelegate
+			Text {
+				text: "%1 — %2".arg( artistName ).arg( songTitle )
+				font.bold: index === 0
+				font.pointSize: 12
+				font.underline: titleMouseArea.containsMouse
+				color: controlsRect.textColor
+				elide: Text.ElideRight
+				anchors.left: parent.left
+				anchors.right: parent.right
+				MouseArea {
+					id: titleMouseArea
+					anchors.fill: parent
+					cursorShape: Qt.PointingHandCursor
+					hoverEnabled: true
+					onClicked: { Qt.openUrlExternally( "http://www.radioparadise.com/rp2-content.php?name=Music&file=songinfo&song_id=%1".arg( songId ) ) }
+				}
+			}
+		}
+
+		ListView {
+			id: historyView
+
+			anchors.top: coverImage.top
+			anchors.bottom: coverImage.bottom
 			anchors.left: coverImage.right
 			anchors.right: songTime.left
 			anchors.leftMargin: 10
 			anchors.rightMargin: 5
 
-			text: ( window.artistName && window.songTitle ) ? "%1 — %2".arg( window.artistName ).arg( window.songTitle ) : ""
-			font.pointSize: 12
-			font.underline: titleMouseArea.containsMouse
-			elide: Text.ElideRight
-			MouseArea {
-				id: titleMouseArea
-				anchors.fill: parent
-				cursorShape: Qt.PointingHandCursor
-				hoverEnabled: true
-				onClicked: { Qt.openUrlExternally( "http://www.radioparadise.com/rp2-content.php?name=Music&file=songinfo&song_id==%1".arg( parent.songId ) ) }
-			}
+			model: historyModel
+			delegate: historyDelegate
+
+			add: Transition { PropertyAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 1000; easing.type: Easing.Linear } }
+			remove: Transition { PropertyAnimation { property: "opacity"; from: 1.0; to: 0.0; duration: 1000; easing.type: Easing.Linear } }
+			addDisplaced: Transition { PropertyAnimation { property: "y"; duration: 500; easing.type: Easing.OutQuad } }
+
+			verticalLayoutDirection: ListView.BottomToTop
+			interactive: false
 		}
 
 		Text {
 			id: songTime
 
-			anchors.verticalCenter: title.verticalCenter
+			anchors.bottom: coverImage.bottom
 			anchors.right: parent.right
 			anchors.rightMargin: 10
 
 			property int seconds: window.songLength - window.songPosition
 
 			text: "(%1:%2)".arg( leadingZero( Math.floor( seconds/60 ) ) ).arg( leadingZero( seconds % 60 ) )
-			font.pointSize: title.font.pointSize
-			color: title.color
-			textFormat: title.textFormat
+			font.pointSize: 12
+			color: controlsRect.textColor
 
 			function leadingZero( num ) {
 				var str = num.toString();
@@ -200,13 +225,13 @@ Window {
 				name: "HD_DISABLED";
 				when: !hdSwitch.checked
 				PropertyChanges { target: controlsBackground; opacity: 0.0 }
-				PropertyChanges { target: title; color: palette.windowText }
+				PropertyChanges { target: controlsRect; textColor: palette.windowText }
 			},
 			State {
 				name: "HD_ENABLED";
 				when: hdSwitch.checked
 				PropertyChanges { target: controlsBackground;  opacity: 0.5 }
-				PropertyChanges { target: title; color: "#FFFFFF" }
+				PropertyChanges { target: controlsRect; textColor: "#FFFFFF" }
 			}
 		]
 
@@ -237,44 +262,7 @@ Window {
 		running: true
 		repeat: true
 		triggeredOnStart: true
-		property var request: new XMLHttpRequest()
-		onTriggered: {
-			var req = request;
-			req.abort();
-			req.open( "GET", "http://radioparadise.com/ajax_xml_song_info.php?song_id=now" );
-			req.onreadystatechange = function() {
-				if( req.readyState === XMLHttpRequest.DONE ) {
-					var root = req.responseXML.documentElement;
-					for( var node = root.firstChild; node; node = node.nextSibling ) {
-						if( node.nodeName === "album" ) {
-							window.albumTitle = node.firstChild.nodeValue;
-						} else if( node.nodeName === "artist" ) {
-							window.artistName = node.firstChild.nodeValue;
-						} else if( node.nodeName === "lyrics" ) {
-							window.lyrics = node.firstChild.nodeValue;
-						} else if( node.nodeName === "med_cover" ) {
-							window.artworkUrl = node.firstChild.nodeValue;
-						} else if( node.nodeName === "refresh_interval" ) {
-							progressTimer.stop();
-							window.songPosition = 0;
-							window.songLength = parseInt( node.firstChild.nodeValue );
-							interval = window.songLength * 1000;
-							progressTimer.start();
-						} else if( node.nodeName === "rating" ) {
-							window.rating = parseFloat( node.firstChild.nodeValue );
-						} else if( node.nodeName === "songid" ) {
-							window.songId = node.firstChild.nodeValue;
-						} else if( node.nodeName === "user_rating" && node.firstChild ) {
-							window.userRating = parseInt( node.firstChild.nodeValue );
-						} else if( node.nodeName === "title" ) {
-							window.songTitle = node.firstChild.nodeValue;
-						}
-					}
-				}
-			}
-			req.send();
-			interval = 5000; // timeout
-		}
+		onTriggered: Metadata.fetchMetadata()
 	}
 
 	Timer {
