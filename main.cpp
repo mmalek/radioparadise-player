@@ -4,8 +4,11 @@
 #include <QQuickWindow>
 
 #include "artworkdownloader.hpp"
-#include "mpris2.hpp"
 #include "config.hpp"
+
+#ifdef BUILD_MPRIS
+#include "mpris2.hpp"
+#endif // BUILD_MPRIS
 
 int main(int argc, char *argv[])
 {
