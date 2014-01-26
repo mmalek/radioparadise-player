@@ -31,6 +31,8 @@ Window {
 	property string songTitle: historyModel.count > 0 ? historyModel.get(0).songTitle : ""
 	property int userRating: historyModel.count > 0 ? historyModel.get(0).userRating : 0
 
+	onArtworkUrlChanged: coverImageFadeOut.start();
+
 	function stop() {
 		player.stop();
 	}
@@ -100,9 +102,15 @@ Window {
 			anchors.top: parent.top
 			anchors.leftMargin: 10
 			anchors.topMargin: 10
+			opacity: 0.0
 
 			width: 64
 			height: 64
+
+			PropertyAnimation { id: coverImageFadeIn; target: coverImage; property: "opacity"; to: 1.0; duration: 500; easing.type: Easing.Linear; alwaysRunToEnd: true }
+			PropertyAnimation { id: coverImageFadeOut; target: coverImage; property: "opacity"; to: 0.0; duration: 500; easing.type: Easing.Linear; alwaysRunToEnd: true }
+
+			onStatusChanged: if( status === Image.Ready ) coverImageFadeIn.start()
 
 			source: window.artworkLocalFile
 		}
