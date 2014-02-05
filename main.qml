@@ -159,6 +159,7 @@ Window {
 
 			verticalLayoutDirection: ListView.BottomToTop
 			interactive: false
+			clip: true
 		}
 
 		Text {
