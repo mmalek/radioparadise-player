@@ -1,5 +1,6 @@
 
 var req = new XMLHttpRequest();
+var HISTORY_COUNT = 4;
 
 function parseSongInfo(document)
 {
@@ -45,7 +46,7 @@ function parseSongInfo(document)
 
 function updatePreviousSong(prevSongIndex,prevSongId)
 {
-	if(prevSongIndex < 4 && ( prevSongIndex >= historyModel.count || historyModel.get(prevSongIndex).songId !== prevSongId )) {
+	if(prevSongIndex < HISTORY_COUNT && ( prevSongIndex >= historyModel.count || historyModel.get(prevSongIndex).songId !== prevSongId )) {
 		var req = new XMLHttpRequest();
 		req.open( "GET", "http://radioparadise.com/ajax_xml_song_info.php?song_id=" + prevSongId );
 		req.onreadystatechange = function(){
@@ -61,12 +62,12 @@ function updatePreviousSong(prevSongIndex,prevSongId)
 
 function setCurrentSong(metadata)
 {
-	if( metadata.songId > 3 ) {
+	if( metadata.songId > HISTORY_COUNT - 1 ) {
 		progressTimer.stop();
 		window.songPosition = 0;
 		historyModel.insert( 0, metadata );
-		if( historyModel.count > 4 ) {
-			historyModel.remove( 4, historyModel.count - 4 );
+		if( historyModel.count > HISTORY_COUNT ) {
+			historyModel.remove( HISTORY_COUNT, historyModel.count - HISTORY_COUNT );
 		}
 		updatePreviousSong(1,metadata.prevSongId);
 		progressTimer.start();
