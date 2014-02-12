@@ -42,8 +42,8 @@ Item {
 		running: parent.visible
 		repeat: true
 		triggeredOnStart: true
+		property var req: new XMLHttpRequest()
 		onTriggered: {
-			var req = new XMLHttpRequest();
 			req.open( "GET", "http://radioparadise.com/readtxt.php" );
 			req.onreadystatechange = function() {
 				if( req.readyState === XMLHttpRequest.DONE ) {
