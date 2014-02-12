@@ -49,13 +49,13 @@ function updatePreviousSong(prevSongIndex,prevSongId)
 	if(prevSongIndex < HISTORY_COUNT && ( prevSongIndex >= historyModel.count || historyModel.get(prevSongIndex).songId !== prevSongId )) {
 		var req = new XMLHttpRequest();
 		req.open( "GET", "http://radioparadise.com/ajax_xml_song_info.php?song_id=" + prevSongId );
-		req.onreadystatechange = function(){
+		req.onreadystatechange = function() {
 			if( req.readyState === XMLHttpRequest.DONE && req.responseXML ) {
 				var metadata = parseSongInfo(req.responseXML.documentElement);
 				historyModel.set(prevSongIndex,metadata);
 				updatePreviousSong(prevSongIndex+1,metadata.prevSongId);
 			}
-		}
+		};
 		req.send();
 	}
 }
@@ -80,12 +80,12 @@ function fetchMetadata()
 {
 	req.abort();
 	req.open( "GET", "http://radioparadise.com/ajax_xml_song_info.php?song_id=now" );
-	req.onreadystatechange = function(){
+	req.onreadystatechange = function() {
 		if( req.readyState === XMLHttpRequest.DONE && req.responseXML ) {
 			var metadata = parseSongInfo(req.responseXML.documentElement);
 			setCurrentSong(metadata);
 		}
-	}
+	};
 	songInfoTimer.interval = 5000; // timeout
 	req.send();
 }
