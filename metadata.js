@@ -62,7 +62,7 @@ function updatePreviousSong(prevSongIndex,prevSongId)
 
 function setCurrentSong(metadata)
 {
-	if( metadata.songId > HISTORY_COUNT - 1 && ( historyModel.count === 0 || historyModel.get(0).songId !== metadata.songId ) ) {
+	if( metadata.songId > 3 && ( historyModel.count === 0 || historyModel.get(0).songId !== metadata.songId ) ) {
 		progressTimer.stop();
 		window.songPosition = 0;
 		historyModel.insert( 0, metadata );
