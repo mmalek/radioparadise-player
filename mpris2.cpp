@@ -2,6 +2,7 @@
 #include "mpris2.hpp"
 #include "mpris2_player.h"
 #include "mpris2_root.h"
+#include "songlist.hpp"
 
 #include <QQuickItem>
 #include <QQuickWindow>
@@ -22,12 +23,48 @@ namespace
 		msg.setArguments(args);
 		QDBusConnection::sessionBus().send(msg);
 	}
+
+	QVariantMap toMetadata( SongList const& songList )
+	{
+		QVariantMap metadata;
+
+		if( !songList.isEmpty() )
+		{
+			Metadata& songMetadata = songList.at(0);
+
+			metadata["xesam:album"] = songMetadata.albumTitle;
+			metadata["xesam:artist"] = songMetadata.artistName;
+			metadata["xesam:asText"] = songMetadata.lyrics;
+			metadata["mpris:length"] = static_cast<long long int>(songMetadata.songLength) * 1000000ll;
+			metadata["xesam:title"] = songMetadata.songTitle;
+
+			const double rating = songMetadata.rating/10.0;
+			if( rating > 0.0 )
+			{
+				metadata["xesam:autoRating"] = rating;
+			}
+
+			const double userRating = static_cast<double>(songMetadata.userRating)/10.0;
+			if( userRating > 0.0 )
+			{
+				metadata["xesam:userRating"] = userRating;
+			}
+			else if( rating > 0.0 )
+			{
+				metadata["xesam:userRating"] = rating;
+			}
+		}
+
+		return metadata;
+	}
+
 } // namespace
 
-Mpris2::Mpris2(QQuickWindow& window, qint64 pid, QObject* parent)
+Mpris2::Mpris2(QQuickWindow& window, SongList& songList, qint64 pid, QObject* parent)
 :
 	QObject(parent),
-	window_(window)
+	window_(window),
+	songList_(songList)
 {
 	new Mpris2Root(this);
 	new Mpris2Player(this);
@@ -47,14 +84,8 @@ Mpris2::Mpris2(QQuickWindow& window, qint64 pid, QObject* parent)
 
 	connect( &window_, SIGNAL(playbackStateChanged()), SLOT(onPlaybackStateChanged()) );
 	connect( &window_, SIGNAL(volumeChanged()), SLOT(onVolumeChanged()) );
-	connect( &window_, SIGNAL(albumTitleChanged()), SLOT(onAlbumTitleChanged()) );
-	connect( &window_, SIGNAL(artistNameChanged()), SLOT(onArtistNameChanged()) );
 	connect( &window_, SIGNAL(artworkLocalFileChanged()), SLOT(onArtworkLocalFileChanged()) );
-	connect( &window_, SIGNAL(lyricsChanged()), SLOT(onLyricsChanged()) );
-	connect( &window_, SIGNAL(ratingChanged()), SLOT(onRatingChanged()) );
-	connect( &window_, SIGNAL(songLengthChanged()), SLOT(onSongLengthChanged()) );
-	connect( &window_, SIGNAL(songTitleChanged()), SLOT(onSongTitleChanged()) );
-	connect( &window_, SIGNAL(userRatingChanged()), SLOT(onUserRatingChanged()) );
+	connect( &songList_, SIGNAL(modelChanged()), SLOT(onSongListChanged()) );
 }
 
 void Mpris2::Raise()
@@ -112,29 +143,8 @@ QString Mpris2::playbackStatus() const
 
 QVariantMap Mpris2::metadata()
 {
-	metaData_["xesam:album"] = window_.property("albumTitle");
-	metaData_["xesam:artist"] = window_.property("artistName");
+	metaData_ = toMetadata(songList_);
 	metaData_["mpris:artUrl"] = window_.property("artworkLocalFile").toString();
-	metaData_["xesam:asText"] = window_.property("lyrics");
-	metaData_["mpris:length"] = window_.property("songLength").toLongLong() * 1000000ll;
-	metaData_["xesam:title"] = window_.property("songTitle");
-
-	const double rating = window_.property("rating").toDouble()/10.0;
-	if( rating > 0.0 )
-	{
-		metaData_["xesam:autoRating"] = rating;
-	}
-
-	const double userRating = window_.property("userRating").toDouble()/10.0;
-	if( userRating > 0.0 )
-	{
-		metaData_["xesam:userRating"] = userRating;
-	}
-	else if( rating > 0.0 )
-	{
-		metaData_["xesam:userRating"] = rating;
-	}
-
 	return metaData_;
 }
 
@@ -169,62 +179,14 @@ void Mpris2::onVolumeChanged()
 	EmitPropertiesChanged("Volume", volume());
 }
 
-void Mpris2::onAlbumTitleChanged()
-{
-	metaData_["xesam:album"] = window_.property("albumTitle");
-	EmitPropertiesChanged("Metadata", metaData_);
-}
-
-void Mpris2::onArtistNameChanged()
-{
-	metaData_["xesam:artist"] = window_.property("artistName");
-	EmitPropertiesChanged("Metadata", metaData_);
-}
-
 void Mpris2::onArtworkLocalFileChanged()
 {
 	metaData_["mpris:artUrl"] = window_.property("artworkLocalFile").toString();
 	EmitPropertiesChanged("Metadata", metaData_);
 }
 
-void Mpris2::onLyricsChanged()
+void Mpris2::onSongListChanged()
 {
-	metaData_["xesam:asText"] = window_.property("lyrics");
+	metaData_ = toMetadata(songList_);
 	EmitPropertiesChanged("Metadata", metaData_);
-}
-
-void Mpris2::onRatingChanged()
-{
-	const double rating = window_.property("rating").toDouble()/10.0;
-	if( rating > 0.0 )
-	{
-		metaData_["xesam:autoRating"] = rating;
-		if( window_.property("userRating").toDouble() <= 0.0 )
-		{
-			metaData_["xesam:userRating"] = rating;
-		}
-		EmitPropertiesChanged("Metadata", metaData_);
-	}
-}
-
-void Mpris2::onSongLengthChanged()
-{
-	metaData_["mpris:length"] = window_.property("songLength").toLongLong() * 1000000ll;
-	EmitPropertiesChanged("Metadata", metaData_);
-}
-
-void Mpris2::onSongTitleChanged()
-{
-	metaData_["xesam:title"] = window_.property("songTitle");
-	EmitPropertiesChanged("Metadata", metaData_);
-}
-
-void Mpris2::onUserRatingChanged()
-{
-	const double userRating = window_.property("userRating").toDouble()/10.0;
-	if( userRating > 0.0 )
-	{
-		metaData_["xesam:userRating"] = userRating;
-		EmitPropertiesChanged("Metadata", metaData_);
-	}
 }

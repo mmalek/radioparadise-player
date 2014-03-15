@@ -8,7 +8,7 @@ endif()
 add_definitions(-DQT_NO_KEYWORDS)
 
 find_package(Qt5 REQUIRED COMPONENTS Multimedia Network Quick Widgets)
-find_package(Qt5 QUIET OPTIONAL_COMPONENTS DBus )
+find_package(Qt5 QUIET OPTIONAL_COMPONENTS DBus)
 
 if( Qt5DBus_FOUND )
 	set( BUILD_MPRIS TRUE )
@@ -19,9 +19,9 @@ configure_file(config.hpp.in config.hpp)
 set(sources
 	HdBackground.qml
 	main.qml
-	metadata.js
 	main.cpp
 	artworkdownloader.cpp
+	songlistdownloader.cpp
 )
 
 set(libraries

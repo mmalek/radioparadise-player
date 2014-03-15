@@ -1,31 +1,38 @@
 #include "artworkdownloader.hpp"
+#include "songlist.hpp"
 
+#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QQuickWindow>
 #include <QTemporaryFile>
 
-ArtworkDownloader::ArtworkDownloader(QQuickWindow& window, QObject *parent)
+ArtworkDownloader::ArtworkDownloader(
+	QQuickWindow& window,
+	SongList& songList,
+	QNetworkAccessManager& networkAccessManager,
+	QObject *parent)
 :
 	QObject(parent),
 	window_(window),
+	songList_(songList),
+	networkAccessManager_( networkAccessManager ),
 	temporaryFile_(0)
 {
-	connect(&window_, SIGNAL(artworkUrlChanged()), SLOT(onArtworkUrlChanged()));
-	connect(&networkAccessManager_, SIGNAL(finished(QNetworkReply*)), SLOT(onDownloadFinished(QNetworkReply*)));
+	connect(&songList, SIGNAL(modelChanged()), SLOT(onSongListChanged()));
 }
 
-void ArtworkDownloader::onArtworkUrlChanged()
+void ArtworkDownloader::onSongListChanged()
 {
-	const QUrl artworkUrl = window_.property("artworkUrl").toUrl();
-
-	if( artworkUrl.isValid() )
+	if(	!songList_.isEmpty() && songList_.at(0).artworkUrl.isValid() )
 	{
-		networkAccessManager_.get(QNetworkRequest(artworkUrl));
+		QNetworkReply* reply = networkAccessManager_.get(QNetworkRequest(songList_.at(0).artworkUrl));
+		connect(reply, SIGNAL(finished()), SLOT(onDownloadFinished()));
 	}
 }
 
-void ArtworkDownloader::onDownloadFinished(QNetworkReply* reply)
+void ArtworkDownloader::onDownloadFinished()
 {
+	QNetworkReply* reply = qobject_cast<QNetworkReply*>(QObject::sender());
 	if(reply->error())
 	{
 		qWarning() << "Cannot download artwork " << reply->url() << ": " << reply->errorString();
@@ -49,4 +56,5 @@ void ArtworkDownloader::onDownloadFinished(QNetworkReply* reply)
 			qWarning() << "Cannot open temporary file!";
 		}
 	}
+	reply->deleteLater();
 }

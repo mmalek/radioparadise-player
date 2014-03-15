@@ -5,12 +5,13 @@
 #include <QDBusObjectPath>
 
 class QQuickWindow;
+class SongList;
 
 class Mpris2 : public QObject
 {
 	Q_OBJECT
 public:
-	explicit Mpris2(QQuickWindow& window, qint64 pid, QObject *parent = 0);
+	explicit Mpris2(QQuickWindow& window, SongList& songList, qint64 pid, QObject *parent = 0);
 
 	//
 	// org.mpris.MediaPlayer2 methods
@@ -124,17 +125,12 @@ Q_SIGNALS:
 private Q_SLOTS:
 	void onPlaybackStateChanged();
 	void onVolumeChanged();
-	void onAlbumTitleChanged();
-	void onArtistNameChanged();
 	void onArtworkLocalFileChanged();
-	void onLyricsChanged();
-	void onRatingChanged();
-	void onSongLengthChanged();
-	void onSongTitleChanged();
-	void onUserRatingChanged();
+	void onSongListChanged();
 
 private:
 	QQuickWindow& window_;
+	SongList& songList_;
 	QVariantMap metaData_;
 };
 

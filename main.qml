@@ -3,8 +3,7 @@ import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
 import QtQuick.Window 2.1
 import QtMultimedia 5.0
-import "metadata.js" as Metadata
-import "."
+import com.paradise.SongList 1.0
 
 Window {
 	id: window
@@ -18,20 +17,10 @@ Window {
 
 	readonly property int playbackState: player.playbackState
 	property real volume: 0.5
-
-	property int songId: historyModel.count > 0 ? historyModel.get(0).songId : 0
-	property string albumTitle: historyModel.count > 0 ? historyModel.get(0).albumTitle : ""
-	property url artworkUrl: historyModel.count > 0 ? historyModel.get(0).artworkUrl : ""
 	property url artworkLocalFile
-	property string artistName: historyModel.count > 0 ? historyModel.get(0).artistName : ""
-	property string lyrics: historyModel.count > 0 ? historyModel.get(0).lyrics : ""
-	property real rating: historyModel.count > 0 ? historyModel.get(0).rating : 0.0
 	property int songPosition: 0 // in seconds
-	property int songLength: historyModel.count > 0 ? historyModel.get(0).songLength : 0 // in seconds
-	property string songTitle: historyModel.count > 0 ? historyModel.get(0).songTitle : ""
-	property int userRating: historyModel.count > 0 ? historyModel.get(0).userRating : 0
 
-	onArtworkUrlChanged: coverImageFadeOut.start();
+	property int songLength: songList.model.length > 0 ? songList.model[0].songLength : 0 // in seconds
 
 	function stop() {
 		player.stop();
@@ -115,6 +104,19 @@ Window {
 			source: window.artworkLocalFile
 		}
 
+		SongList {
+			objectName: "songList"
+			id: songList
+
+			onModelChanged: {
+				progressTimer.stop();
+				window.songPosition = 0;
+				progressTimer.start();
+				coverImageFadeOut.start();
+				print("refresh interval " + window.songLength);
+			}
+		}
+
 		ListModel {
 			id: historyModel
 		}
@@ -150,7 +152,7 @@ Window {
 			anchors.leftMargin: 10
 			anchors.rightMargin: 5
 
-			model: historyModel
+			model: songList.model
 			delegate: historyDelegate
 
 			add: Transition { PropertyAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 1000; easing.type: Easing.Linear } }
@@ -264,14 +266,6 @@ Window {
 		anchors.top: parent.top
 		anchors.rightMargin: 10
 		anchors.topMargin: 10
-	}
-
-	Timer {
-		id: songInfoTimer
-		running: true
-		repeat: true
-		triggeredOnStart: true
-		onTriggered: Metadata.fetchMetadata()
 	}
 
 	Timer {
