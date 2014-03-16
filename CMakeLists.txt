@@ -19,8 +19,9 @@ configure_file(config.hpp.in config.hpp)
 set(sources
 	HdBackground.qml
 	main.qml
-	main.cpp
 	artworkdownloader.cpp
+	main.cpp
+	songlist.cpp
 	songlistdownloader.cpp
 )
 

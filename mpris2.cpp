@@ -30,7 +30,7 @@ namespace
 
 		if( !songList.isEmpty() )
 		{
-			Metadata& songMetadata = songList.at(0);
+			Metadata const& songMetadata = songList.at(0);
 
 			metadata["xesam:album"] = songMetadata.albumTitle;
 			metadata["xesam:artist"] = songMetadata.artistName;
@@ -85,7 +85,7 @@ Mpris2::Mpris2(QQuickWindow& window, SongList& songList, qint64 pid, QObject* pa
 	connect( &window_, SIGNAL(playbackStateChanged()), SLOT(onPlaybackStateChanged()) );
 	connect( &window_, SIGNAL(volumeChanged()), SLOT(onVolumeChanged()) );
 	connect( &window_, SIGNAL(artworkLocalFileChanged()), SLOT(onArtworkLocalFileChanged()) );
-	connect( &songList_, SIGNAL(modelChanged()), SLOT(onSongListChanged()) );
+	connect( &songList_, SIGNAL(curSongChanged()), SLOT(onCurSongChanged()) );
 }
 
 void Mpris2::Raise()
@@ -185,7 +185,7 @@ void Mpris2::onArtworkLocalFileChanged()
 	EmitPropertiesChanged("Metadata", metaData_);
 }
 
-void Mpris2::onSongListChanged()
+void Mpris2::onCurSongChanged()
 {
 	metaData_ = toMetadata(songList_);
 	EmitPropertiesChanged("Metadata", metaData_);

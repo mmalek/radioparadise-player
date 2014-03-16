@@ -126,7 +126,7 @@ private Q_SLOTS:
 	void onPlaybackStateChanged();
 	void onVolumeChanged();
 	void onArtworkLocalFileChanged();
-	void onSongListChanged();
+	void onCurSongChanged();
 
 private:
 	QQuickWindow& window_;

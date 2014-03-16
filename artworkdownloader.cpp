@@ -18,10 +18,10 @@ ArtworkDownloader::ArtworkDownloader(
 	networkAccessManager_( networkAccessManager ),
 	temporaryFile_(0)
 {
-	connect(&songList, SIGNAL(modelChanged()), SLOT(onSongListChanged()));
+	connect(&songList, SIGNAL(curSongChanged()), SLOT(onCurSongChanged()));
 }
 
-void ArtworkDownloader::onSongListChanged()
+void ArtworkDownloader::onCurSongChanged()
 {
 	if(	!songList_.isEmpty() && songList_.at(0).artworkUrl.isValid() )
 	{

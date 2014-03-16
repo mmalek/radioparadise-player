@@ -9,9 +9,6 @@
 #include "songlistdownloader.hpp"
 #include "config.hpp"
 
-#include "moc_metadata.cpp"
-#include "moc_songlist.cpp"
-
 #ifdef BUILD_MPRIS
 #include "mpris2.hpp"
 #endif // BUILD_MPRIS
@@ -22,7 +19,6 @@ int main(int argc, char *argv[])
 	app.setApplicationName(QStringLiteral("Radio Paradise"));
 	app.setApplicationVersion("1.0");
 
-	qmlRegisterType<Metadata>();
 	qmlRegisterType<SongList>("com.paradise.SongList", 1, 0, "SongList");
 
 	QQmlApplicationEngine engine(QUrl("qrc:///qml/main.qml"));

@@ -4,7 +4,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QXmlStreamReader>
-#include <QScopedPointer>
 
 namespace
 {
@@ -99,38 +98,38 @@ void SongListDownloader::onSongFetched(int i)
 	else
 	{
 		timeoutTimers_.at(i)->stop();
-		QScopedPointer<Metadata> metadata( new Metadata( &songList_ ) );
+		Metadata metadata;
 
 		QXmlStreamReader reader(reply);
 		while(reader.readNextStartElement())
 		{
 			if(reader.name() == "song")
-				parseSongTag(*metadata, reader);
+				parseSongTag(metadata, reader);
 			else
 				reader.skipCurrentElement();
 		}
 
-		if(i < songList_.modelSize() - 1 && metadata->prevSongId > 3)
+		if(i < songList_.modelSize() - 1 && metadata.prevSongId > 3)
 		{
-			fetchSongInfo(i+1, metadata->prevSongId);
+			fetchSongInfo(i+1, metadata.prevSongId);
 		}
 
 		if(i == 0)
 		{
-			timer_.setInterval(1000*metadata->songLength);
+			timer_.setInterval(1000*metadata.songLength);
 			timer_.start();
 
-			if(metadata->songId > 3 && (songList_.size() == 0 || songList_.at(0).songId != metadata->songId))
+			if(metadata.songId > 3 && (songList_.size() == 0 || songList_.at(0).songId != metadata.songId))
 			{
-				songList_.push_front(metadata.take());
+				songList_.push_front(metadata);
 			}
 		}
 		else if(i > 0)
 		{
 			if(i < songList_.size())
-				songList_.at(i) = *metadata;
+				songList_.set(i, metadata);
 			else
-				songList_.push_back(metadata.take());
+				songList_.push_back(metadata);
 		}
 	}
 	reply->deleteLater();

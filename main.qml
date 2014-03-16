@@ -20,8 +20,6 @@ Window {
 	property url artworkLocalFile
 	property int songPosition: 0 // in seconds
 
-	property int songLength: songList.model.length > 0 ? songList.model[0].songLength : 0 // in seconds
-
 	function stop() {
 		player.stop();
 	}
@@ -108,12 +106,11 @@ Window {
 			objectName: "songList"
 			id: songList
 
-			onModelChanged: {
+			onCurSongChanged: {
 				progressTimer.stop();
 				window.songPosition = 0;
 				progressTimer.start();
 				coverImageFadeOut.start();
-				print("refresh interval " + window.songLength);
 			}
 		}
 
@@ -152,7 +149,7 @@ Window {
 			anchors.leftMargin: 10
 			anchors.rightMargin: 5
 
-			model: songList.model
+			model: songList
 			delegate: historyDelegate
 
 			add: Transition { PropertyAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 1000; easing.type: Easing.Linear } }
@@ -171,7 +168,7 @@ Window {
 			anchors.right: parent.right
 			anchors.rightMargin: 10
 
-			property int seconds: window.songLength - window.songPosition
+			property int seconds: songList.curSongLength - window.songPosition
 
 			text: "(%1:%2)".arg( leadingZero( Math.floor( seconds/60 ) ) ).arg( leadingZero( seconds % 60 ) )
 			font.pointSize: 12
@@ -274,7 +271,7 @@ Window {
 		running: false
 		repeat: true
 		onTriggered: {
-			if( window.songPosition < window.songLength )
+			if( window.songPosition < songList.curSongLength )
 				++window.songPosition;
 			else
 				progressTimer.stop();
