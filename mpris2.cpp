@@ -160,7 +160,7 @@ void Mpris2::setVolume(double value)
 
 qlonglong Mpris2::position() const
 {
-	return window_.property("songPosition").toLongLong() * 1000000ll;
+	return static_cast<long long>( songList_.curSongPosition() ) * 1000000ll;
 }
 
 bool Mpris2::canGoNext() const

@@ -18,7 +18,6 @@ Window {
 	readonly property int playbackState: player.playbackState
 	property real volume: 0.5
 	property url artworkLocalFile
-	property int songPosition: 0 // in seconds
 
 	function stop() {
 		player.stop();
@@ -107,9 +106,6 @@ Window {
 			id: songList
 
 			onCurSongChanged: {
-				progressTimer.stop();
-				window.songPosition = 0;
-				progressTimer.start();
 				coverImageFadeOut.start();
 			}
 		}
@@ -168,7 +164,7 @@ Window {
 			anchors.right: parent.right
 			anchors.rightMargin: 10
 
-			property int seconds: songList.curSongLength - window.songPosition
+			property int seconds: songList.curSongLength - songList.curSongPosition
 
 			text: "(%1:%2)".arg( leadingZero( Math.floor( seconds/60 ) ) ).arg( leadingZero( seconds % 60 ) )
 			font.pointSize: 12
@@ -263,18 +259,5 @@ Window {
 		anchors.top: parent.top
 		anchors.rightMargin: 10
 		anchors.topMargin: 10
-	}
-
-	Timer {
-		id: progressTimer
-		interval: 1000
-		running: false
-		repeat: true
-		onTriggered: {
-			if( window.songPosition < songList.curSongLength )
-				++window.songPosition;
-			else
-				progressTimer.stop();
-		}
 	}
 }

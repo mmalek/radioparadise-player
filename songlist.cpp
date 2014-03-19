@@ -1,10 +1,16 @@
 
 #include "songlist.hpp"
 
+#include <QTimer>
+
 SongList::SongList(QObject *parent)
 :
-	QAbstractListModel(parent)
+	QAbstractListModel(parent),
+	curSongPosition_(0),
+	progressTimer_(new QTimer(this))
 {
+	progressTimer_->setInterval(1000);
+	connect(progressTimer_, SIGNAL(timeout()), SLOT(onProgressTimerTimeout()));
 }
 
 int SongList::rowCount(const QModelIndex& /*parent*/) const
@@ -61,6 +67,11 @@ void SongList::push_front(Metadata const& metadata)
 	removeRedundantElements();
 
 	Q_EMIT curSongChanged();
+
+	progressTimer_->stop();
+	curSongPosition_ = 0;
+	Q_EMIT curSongPositionChanged();
+	progressTimer_->start();
 }
 
 void SongList::push_back(Metadata const& metadata)
@@ -80,6 +91,19 @@ void SongList::set(int i, Metadata const& metadata)
 	if(i == 0)
 	{
 		Q_EMIT curSongChanged();
+	}
+}
+
+void SongList::onProgressTimerTimeout()
+{
+	if( !songs_.isEmpty() && curSongPosition_ < songs_.front().songLength )
+	{
+		++curSongPosition_;
+		Q_EMIT curSongPositionChanged();
+	}
+	else
+	{
+		progressTimer_->stop();
 	}
 }
 
